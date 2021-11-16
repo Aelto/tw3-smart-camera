@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<UserConfig>
+  <Group id="PREFIXgeneral" displayName="Mods.prefix_name">
+    <PresetsArray>
+      <Preset id="0" displayName="prefix_defaults" >
+        <Entry varId="PREFIXmodEnabled" value="1" />
+      </Preset>
+    </PresetsArray>
+
+    <VisibleVars>
+        <Var id="PREFIXmodEnabled" displayName="prefix_mod_enabled" displayType="TOGGLE" />
+    </VisibleVars>
+    </Group>
+
+
+</UserConfig>
