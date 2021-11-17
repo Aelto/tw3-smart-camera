@@ -1,8 +1,10 @@
 ;meta[language=en]
 ; id      |key(hex)|key(str)| text
-2115494001|        |panel_prefix_name|Mod Name
-2115494002|        |panel_combat_prefix_name|Mod Name
-2115494003|        |preset_Mods_prefix_name|Mod Name
-2115494004|        |preset_Mods_combat_prefix_name|Mod Name
-2115494005|        |preset_value_prefix_defaults|Defaults
-2115494006|        |option_prefix_mod_enabled|<font color="#30a14e">MOD ENABLED</font>
+2115494001|        |panel_sc_name|Smart Camera
+2115494002|        |panel_combat_sc_name|Smart Camera
+2115494003|        |preset_Mods_sc_name|Smart Camera
+2115494004|        |preset_Mods_combat_sc_name|Smart Camera
+2115494005|        |preset_value_sc_defaults|Defaults
+2115494006|        |option_sc_mod_enabled|<font color="#30a14e">MOD ENABLED</font>
+2115494007|        |option_sc_zoom_out_multiplier|Zoom out from targets in your back
+2115494008|        |option_sc_horizontal_sensitivity|Horizontal sensitivity
