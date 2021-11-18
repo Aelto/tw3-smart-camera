@@ -4,6 +4,9 @@
     <PresetsArray>
       <Preset id="0" displayName="sc_defaults" >
         <Entry varId="SCmodEnabled" value="1" />
+        <Entry varId="SCzoomOutMultiplier" value="1" />
+        <Entry varId="SChorizontalSensitivity" value="1" />
+        <Entry varId="SCoverallSpeed" value="1" />
       </Preset>
     </PresetsArray>
 
@@ -11,6 +14,7 @@
         <Var id="SCmodEnabled" displayName="sc_mod_enabled" displayType="TOGGLE" />
         <Var id="SCzoomOutMultiplier" displayName="sc_zoom_out_multiplier" displayType="SLIDER;0;10;100" />
         <Var id="SChorizontalSensitivity" displayName="sc_horizontal_sensitivity" displayType="SLIDER;0;10;100" />
+        <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />
     </VisibleVars>
   </Group>
 </UserConfig>

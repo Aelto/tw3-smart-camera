@@ -48,4 +48,9 @@ struct SC_settings {
    * Multiplier control the horizontal sensitivity
    */
   var horizontal_sensitivity: float;
+
+  /**
+   * The overall speed of the camera
+   */
+  var overall_speed: float;
 }

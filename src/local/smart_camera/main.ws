@@ -53,19 +53,22 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   rotation = SC_getRotationToLookAtPositionsAroundPoint(
     player_position,
-    positions
+    positions,
+    player
   );
 
-  player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX') * delta;
+  player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
+    * delta
+    * player.smart_camera_data.settings.horizontal_sensitivity;
+
   player.smart_camera_data.desired_x_direction *= (1 - 0.9) * delta;
 
   if (PowF(AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw), 2) > 4) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.combat_start_smoothing,
+      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
       + player.smart_camera_data.desired_x_direction
-      * player.smart_camera_data.settings.horizontal_sensitivity
     );
 
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
@@ -75,23 +78,32 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions)
               * player.smart_camera_data.settings.zoom_out_multiplier;
 
-  moveData.cameraLocalSpaceOffset.Y = LerpF(delta * 0.2 * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Y, back_offset);
+  moveData.cameraLocalSpaceOffset.Y = LerpF(delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Y, back_offset);
 
   // some hardcoded values to avoid the camera flying up for no reason
-  moveData.cameraLocalSpaceOffset.Z = LerpF(delta * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Z, 0);
-  moveData.pivotPositionController.offsetZ = LerpF(delta * player.smart_camera_data.combat_start_smoothing, moveData.pivotPositionController.offsetZ, 1.3f);
+  moveData.cameraLocalSpaceOffset.Z = LerpF(delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Z, 0);
+  moveData.pivotPositionController.offsetZ = LerpF(delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing, moveData.pivotPositionController.offsetZ, 1.3f);
 
   return true;
 }
 
+function SC_getVelocityOffset(player: CR4Player): Vector {
+  return player.GetMovingAgentComponent().GetVelocity() * 0.5;
+}
+
 function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position: Vector, positions: array<Vector>): float {
-  var entities_count_in_back: int;
+  var entities_count_in_back: float;
   var player_back_heading: float;
+  var camera_position: Vector;
   var mean_position: Vector;
   var current_angle: float;
   var i: int;
 
-  player_back_heading = player.GetHeading() + 180;
+  camera_position = theCamera.GetCameraPosition();
+  player_back_heading = VecHeading(
+    camera_position - player_position
+  );
+
   for (i = 0; i < positions.Size(); i += 1) {
     current_angle = VecHeading(positions[i] - player_position);
     current_angle = AngleDistance(player_back_heading, current_angle);
@@ -103,6 +115,15 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
 
     entities_count_in_back += 1;
     mean_position += positions[i];
+
+    // if the creature in right behind the camera then we add the position one
+    // more, but we don't increase the entities count so that it has a bigger
+    // impact on the mean vlaue.
+    // if (current_angle * current_angle > 60 * 60) {
+    //   continue;
+    // }
+
+    // mean_position += positions[i];
   }
 
   // no entities in the back, so there is no bonus offset
@@ -115,7 +136,7 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
   return MinF(VecDistance2D(mean_position, player_position) * -1, 10);
 }
 
-function SC_getRotationToLookAtPositionsAroundPoint(point: Vector, positions_around_point: array<Vector>): EulerAngles {
+function SC_getRotationToLookAtPositionsAroundPoint(point: Vector, positions_around_point: array<Vector>, player: CR4Player): EulerAngles {
   var rotation: EulerAngles;
   var mean_position: Vector;
   var i: int;
@@ -125,6 +146,7 @@ function SC_getRotationToLookAtPositionsAroundPoint(point: Vector, positions_aro
   }
 
   mean_position /= i;
+  mean_position += SC_getVelocityOffset(player);
 
   // rotation = VecToRotation(mean_position - theCamera.GetCameraPosition());
   rotation = VecToRotation(mean_position - thePlayer.GetWorldPosition());
