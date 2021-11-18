@@ -8,6 +8,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var target: CActor;
 
   if (!player.IsInCombat()) {
+    player.smart_camera_data.time_before_target_fetch = -1;
     player.smart_camera_data.combat_start_smoothing = 0;
 
     return false;
@@ -20,6 +21,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
 
   if (!player.smart_camera_data.settings.is_enabled) {
+    player.smart_camera_data.time_before_target_fetch = -1;
+
     return false;
   }
 
