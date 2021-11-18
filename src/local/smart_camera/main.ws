@@ -8,8 +8,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var target: CActor;
 
   if (!player.IsInCombat()) {
-    return false;
+    player.smart_camera_data.combat_start_smoothing = 0;
 
+    return false;
   }
 
   player.smart_camera_data.time_before_settings_fetch = -10;
@@ -29,6 +30,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   moveData.pivotPositionController = theGame.GetGameCamera().GetActivePivotPositionController();
 
   player_position = player.GetWorldPosition();
+  // 3 seconds 
+  player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
 
   player.smart_camera_data.time_before_target_fetch -= delta;
   if (player.smart_camera_data.time_before_target_fetch <= 0) {
@@ -55,7 +58,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   if (PowF(AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw), 2) > 4) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta,
+      delta * player.smart_camera_data.combat_start_smoothing,
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
       + player.smart_camera_data.desired_x_direction
@@ -69,11 +72,11 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions)
               * player.smart_camera_data.settings.zoom_out_multiplier;
 
-  moveData.cameraLocalSpaceOffset.Y = LerpF(delta * 0.2, moveData.cameraLocalSpaceOffset.Y, back_offset);
+  moveData.cameraLocalSpaceOffset.Y = LerpF(delta * 0.2 * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Y, back_offset);
 
   // some hardcoded values to avoid the camera flying up for no reason
-  moveData.cameraLocalSpaceOffset.Z = 0;
-  moveData.pivotPositionController.offsetZ = 1.3f;
+  moveData.cameraLocalSpaceOffset.Z = LerpF(delta * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Z, 0);
+  moveData.pivotPositionController.offsetZ = LerpF(delta * player.smart_camera_data.combat_start_smoothing, moveData.pivotPositionController.offsetZ, 1.3f);
 
   return true;
 }

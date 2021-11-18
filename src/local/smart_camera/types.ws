@@ -25,6 +25,12 @@ struct SC_data {
    * The cached settings data
    */
   var settings: SC_settings;
+
+  /**
+   * a percentage going from 0 to 1 representing how much the movements of the
+   * camera should be smoothen at the start of the camera.
+   */
+  var combat_start_smoothing: float;
 }
 
 struct SC_settings {
