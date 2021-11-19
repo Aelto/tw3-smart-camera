@@ -7,5 +7,7 @@
 2115722005|        |preset_value_sc_defaults|Defaults
 2115722006|        |option_sc_mod_enabled|<font color="#30a14e">MOD ENABLED</font>
 2115722007|        |option_sc_zoom_out_multiplier|Zoom out from targets in your back
-2115722008|        |option_sc_horizontal_sensitivity|Horizontal sensitivity
-2115722009|        |option_sc_horizontal_sensitivity|Horizontal sensitivity
+2115722008|        |option_sc_min_zoom_out|Minimum zoom
+2115722009|        |option_sc_max_zoom_out|Maximum zoom
+2115722010|        |option_sc_horizontal_sensitivity|Horizontal sensitivity
+2115722011|        |option_sc_horizontal_sensitivity|Horizontal sensitivity

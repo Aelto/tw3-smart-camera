@@ -44,6 +44,10 @@ struct SC_settings {
    */
   var zoom_out_multiplier: float;
 
+  var min_zoom_out: float;
+
+  var max_zoom_out: float;
+
   /**
    * Multiplier control the horizontal sensitivity
    */

@@ -14,7 +14,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     return false;
   }
 
-  player.smart_camera_data.time_before_settings_fetch = -10;
+  player.smart_camera_data.time_before_settings_fetch -= delta;
   if (player.smart_camera_data.time_before_settings_fetch <= 0) {
     player.smart_camera_data.time_before_settings_fetch = 10;
     SC_reloadSettings(player.smart_camera_data.settings);
@@ -88,7 +88,31 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 }
 
 function SC_getVelocityOffset(player: CR4Player): Vector {
-  return player.GetMovingAgentComponent().GetVelocity() * 0.5;
+  var player_to_camera_heading: float;
+  var player_velocity: Vector;
+  var angle_distance: float;
+  var multiplier: float;
+
+  player_to_camera_heading = VecHeading(
+    theCamera.GetCameraPosition() - player.GetWorldPosition()
+  );
+
+  player_velocity = player.GetMovingAgentComponent().GetVelocity();
+
+  angle_distance = AngleDistance(
+    VecHeading(player_velocity),
+    player_to_camera_heading
+  );
+
+  // slowly decreases the velocity offset as the velocity gets closer towards the
+  // camera.
+  multiplier = MinF(angle_distance, 90) / 90;
+
+  if (player.IsInCombatAction()) {
+    return player_velocity * 0.5 * multiplier * 0.2;
+  }
+
+  return player_velocity * 0.5 * multiplier;
 }
 
 function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position: Vector, positions: array<Vector>): float {
@@ -133,7 +157,17 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
 
   mean_position /= entities_count_in_back;
 
-  return MinF(VecDistance2D(mean_position, player_position) * -1, 10);
+  LogChannel('SC', "v = " + (VecDistance2D(mean_position, player_position) * -1) + " y =" + ClampF(
+    VecDistance2D(mean_position, player_position) * -1,
+    player.smart_camera_data.settings.min_zoom_out,
+    player.smart_camera_data.settings.max_zoom_out,
+  ));
+
+  return ClampF(
+    VecDistance2D(mean_position, player_position) * -1,
+    -player.smart_camera_data.settings.min_zoom_out,
+    -player.smart_camera_data.settings.max_zoom_out,
+  );;
 }
 
 function SC_getRotationToLookAtPositionsAroundPoint(point: Vector, positions_around_point: array<Vector>, player: CR4Player): EulerAngles {
