@@ -31,6 +31,12 @@ struct SC_data {
    * camera should be smoothen at the start of the camera.
    */
   var combat_start_smoothing: float;
+
+  var desired_y_direction: float;
+
+  var update_y_direction_duration: float;
+
+  var corrected_y_direction: float;
 }
 
 struct SC_settings {
@@ -39,14 +45,7 @@ struct SC_settings {
    */
   var is_enabled: bool;
 
-  /**
-   * Multiplier controlling zoom outs of the camera
-   */
-  var zoom_out_multiplier: float;
-
-  var min_zoom_out: float;
-
-  var max_zoom_out: float;
+  var camera_zoom: float;
 
   /**
    * Multiplier control the horizontal sensitivity

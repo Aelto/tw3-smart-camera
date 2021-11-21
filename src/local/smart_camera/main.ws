@@ -1,8 +1,12 @@
 
 function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
   var new_entities: array<CGameplayEntity>;
+  var is_mean_position_too_high: bool;
+  var rotation_to_target: EulerAngles;
   var positions: array<Vector>;
   var player_position: Vector;
+  var target_position: Vector;
+  var mean_position: Vector;
   var rotation: EulerAngles;
   var back_offset: float;
   var target: CActor;
@@ -50,10 +54,13 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   SC_removeDeadEntities(player.smart_camera_data.nearby_targets);
   positions = SC_getEntitiesPositions(player.smart_camera_data.nearby_targets);
   target = player.GetTarget();
+  target_position = target.GetWorldPosition();
 
-  rotation = SC_getRotationToLookAtPositionsAroundPoint(
-    player_position,
-    positions,
+  mean_position = SC_getMeanPosition(positions, player);
+  is_mean_position_too_high = mean_position.Z - player_position.Z > 3;
+
+  rotation = SC_getRotationToLookAtPosition(
+    mean_position,
     player
   );
 
@@ -61,30 +68,140 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     * delta
     * player.smart_camera_data.settings.horizontal_sensitivity;
 
-  player.smart_camera_data.desired_x_direction *= (1 - 0.9) * delta;
+  player.smart_camera_data.desired_x_direction *= 1 - (1 - 0.99 * delta);
 
-  if (PowF(AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw), 2) > 4) {
+  ////////////////////
+  // Yaw correction //
+  ///////////////////
+  //#region yaw correction
+
+  if (player.smart_camera_data.desired_x_direction != 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
       moveData.pivotRotationValue.Yaw,
-      rotation.Yaw
+      moveData.pivotRotationValue.Yaw
       + player.smart_camera_data.desired_x_direction
     );
 
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
+  else if (PowF(AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw), 2) > 4) {
+    moveData.pivotRotationValue.Yaw = LerpAngleF(
+      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+      moveData.pivotRotationValue.Yaw,
+      rotation.Yaw
+    );
+
+    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+  }
+  //#endregion yaw correction
+
+  //////////////////////
+  // Pitch correction //
+  //////////////////////
+  //#region pitch correction
+
+  // some pitch correction if the mean position is too high compared to the
+  // player, which means the target is probably off camera.
+  if (is_mean_position_too_high) {
+    if (player.smart_camera_data.update_y_direction_duration <= 0) {
+      player.smart_camera_data.update_y_direction_duration = 1;
+    }
+
+    moveData.pivotRotationController.SetDesiredPitch( rotation.Pitch );
+    moveData.pivotRotationValue.Pitch	= LerpAngleF(
+      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+      moveData.pivotRotationValue.Pitch,
+      rotation.Pitch
+    );
+  }
+  // do pitch correction if the target is blocked by Geralt, but only if the 
+  // pitch is not lower than it current one.
+  // As pitch goes down, camera looks further down.
+  else if (!player.IsInCombatAction() && SC_shouldLowerPitch(player, target)) {
+    rotation_to_target = VecToRotation(target_position - player_position);
+
+    // only if the creature is near the player
+    if (VecDistanceSquared2D(target_position, player_position) < 5 * 5
+    // only if the creature is not already higher than the player
+    && target_position.Z < player_position.Z + 1
+    // only if the camera is not already looking down
+    &&  rotation_to_target.Pitch - 30 < moveData.pivotRotationValue.Pitch) {
+
+      if (player.smart_camera_data.update_y_direction_duration <= 0) {
+        player.smart_camera_data.update_y_direction_duration = 1;
+        player.smart_camera_data.corrected_y_direction = moveData.pivotRotationValue.Pitch - 10;
+      }
+
+      moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.corrected_y_direction );
+      moveData.pivotRotationValue.Pitch	= LerpAngleF(
+        delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+        moveData.pivotRotationValue.Pitch,
+        player.smart_camera_data.corrected_y_direction
+      );
+    }
+
+  }
+  else if (player.smart_camera_data.update_y_direction_duration > 0) {
+    player.smart_camera_data.update_y_direction_duration -= delta * player.smart_camera_data.settings.overall_speed;
+
+    // player.smart_camera_data.desired_y_direction = LerpF(
+    //   delta * 0.1,
+    //   player.smart_camera_data.desired_y_direction,
+    //   moveData.pivotRotationValue.Pitch
+    // );
+
+    moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.desired_y_direction );
+    moveData.pivotRotationValue.Pitch	= LerpAngleF(
+      delta * player.smart_camera_data.settings.overall_speed,
+      moveData.pivotRotationValue.Pitch,
+      player.smart_camera_data.desired_y_direction
+    );
+  }
+  else {
+    player.smart_camera_data.desired_y_direction = moveData.pivotRotationValue.Pitch;
+  }
+  //#endregion pitch correction
+
+  /////////////////////
+  // Zoom correction //
+  /////////////////////
+  //#region zoom correction
 
   // offset coming from the creatures behind the Camera's back.
-  back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions)
-              * player.smart_camera_data.settings.zoom_out_multiplier;
+  back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions);
 
-  moveData.cameraLocalSpaceOffset.Y = LerpF(delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Y, back_offset);
+  moveData.cameraLocalSpaceOffset.Y = LerpF(
+    delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing,
+    moveData.cameraLocalSpaceOffset.Y,
+    back_offset
+  );
 
   // some hardcoded values to avoid the camera flying up for no reason
   moveData.cameraLocalSpaceOffset.Z = LerpF(delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Z, 0);
   moveData.pivotPositionController.offsetZ = LerpF(delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing, moveData.pivotPositionController.offsetZ, 1.3f);
+  //#endregion zoom correction
 
   return true;
+}
+
+/**
+ * Returns a value between 0 and 1, where 1 means the pitch should be lowered
+ * by 100% of the pitch correction.
+ */
+function SC_shouldLowerPitch(player: CR4Player, target: CActor): bool {
+  var heading_to_target: float;
+  var heading_to_player: float;
+  var camera_position: Vector;
+  var distance: float;
+
+  camera_position = theCamera.GetCameraPosition();
+  heading_to_target = VecHeading(target.GetWorldPosition() - camera_position);
+  heading_to_player = VecHeading(player.GetWorldPosition() - camera_position);
+
+  distance = AngleDistance(heading_to_player, heading_to_target);
+
+  return distance * distance < 10 * 10;
 }
 
 function SC_getVelocityOffset(player: CR4Player): Vector {
@@ -106,7 +223,7 @@ function SC_getVelocityOffset(player: CR4Player): Vector {
 
   // slowly decreases the velocity offset as the velocity gets closer towards the
   // camera.
-  multiplier = MinF(angle_distance, 90) / 90;
+  multiplier = MinF(angle_distance, 180) / 180;
 
   if (player.IsInCombatAction()) {
     return player_velocity * 0.5 * multiplier * 0.2;
@@ -157,35 +274,29 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
 
   mean_position /= entities_count_in_back;
 
-  LogChannel('SC', "v = " + (VecDistance2D(mean_position, player_position) * -1) + " y =" + ClampF(
-    VecDistance2D(mean_position, player_position) * -1,
-    player.smart_camera_data.settings.min_zoom_out,
-    player.smart_camera_data.settings.max_zoom_out,
-  ));
-
   return ClampF(
     VecDistance2D(mean_position, player_position) * -1,
-    -player.smart_camera_data.settings.min_zoom_out,
-    -player.smart_camera_data.settings.max_zoom_out,
+    -player.smart_camera_data.settings.camera_zoom,
+    player.smart_camera_data.settings.camera_zoom * -5,
   );;
 }
 
-function SC_getRotationToLookAtPositionsAroundPoint(point: Vector, positions_around_point: array<Vector>, player: CR4Player): EulerAngles {
-  var rotation: EulerAngles;
+function SC_getMeanPosition(positions: array<Vector>, player: CR4Player): Vector {
   var mean_position: Vector;
   var i: int;
 
-  for (i = 0; i < positions_around_point.Size(); i += 1) {
-    mean_position += positions_around_point[i];
+  for (i = 0; i < positions.Size(); i += 1) {
+    mean_position += positions[i];
   }
 
   mean_position /= i;
   mean_position += SC_getVelocityOffset(player);
 
-  // rotation = VecToRotation(mean_position - theCamera.GetCameraPosition());
-  rotation = VecToRotation(mean_position - thePlayer.GetWorldPosition());
+  return mean_position;
+}
 
-  return rotation;
+function SC_getRotationToLookAtPosition(mean_position: Vector, player: CR4Player): EulerAngles {
+  return VecToRotation(mean_position - player.GetWorldPosition());
 }
 
 function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
@@ -194,7 +305,7 @@ function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
   FindGameplayEntitiesInRange(
     entities,
     player,
-    25,
+    20,
     10,,
     FLAG_OnlyAliveActors | FLAG_ExcludePlayer | FLAG_Attitude_Hostile,
     player
