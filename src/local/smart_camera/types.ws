@@ -32,18 +32,23 @@ struct SC_data {
    */
   var combat_start_smoothing: float;
 
+  var exploration_start_smoothing: float;
+
   var desired_y_direction: float;
 
   var update_y_direction_duration: float;
 
   var corrected_y_direction: float;
+
+  var pitch_correction_delay: float;
 }
 
 struct SC_settings {
   /**
    * Whether or not the mod is enabled
    */
-  var is_enabled: bool;
+  var is_enabled_in_combat: bool;
+  var is_enabled_in_exploration: bool;
 
   var camera_zoom: float;
 
@@ -56,4 +61,10 @@ struct SC_settings {
    * The overall speed of the camera
    */
   var overall_speed: float;
+
+  var camera_fov: float;
+
+  var camera_height: float;
+
+  var camera_horizontal_position: float;
 }

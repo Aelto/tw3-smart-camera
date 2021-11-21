@@ -8,15 +8,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var target_position: Vector;
   var mean_position: Vector;
   var rotation: EulerAngles;
+  var camera: CCustomCamera;
   var back_offset: float;
   var target: CActor;
-
-  if (!player.IsInCombat()) {
-    player.smart_camera_data.time_before_target_fetch = -1;
-    player.smart_camera_data.combat_start_smoothing = 0;
-
-    return false;
-  }
 
   player.smart_camera_data.time_before_settings_fetch -= delta;
   if (player.smart_camera_data.time_before_settings_fetch <= 0) {
@@ -24,17 +18,32 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     SC_reloadSettings(player.smart_camera_data.settings);
   }
 
-  if (!player.smart_camera_data.settings.is_enabled) {
+  if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
     player.smart_camera_data.time_before_target_fetch = -1;
 
     return false;
   }
 
-  theGame.GetGameCamera().ChangePivotDistanceController( 'Default' );
-  theGame.GetGameCamera().ChangePivotRotationController( 'Exploration' );
-  moveData.pivotRotationController = theGame.GetGameCamera().GetActivePivotRotationController();
-  moveData.pivotDistanceController = theGame.GetGameCamera().GetActivePivotDistanceController();
-  moveData.pivotPositionController = theGame.GetGameCamera().GetActivePivotPositionController();
+  camera = theGame.GetGameCamera();
+  camera.ChangePivotDistanceController( 'Default' );
+  camera.ChangePivotRotationController( 'Exploration' );
+  camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
+  moveData.pivotRotationController = camera.GetActivePivotRotationController();
+  moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
+  moveData.pivotPositionController = camera.GetActivePivotPositionController();
+  moveData.pivotPositionController.SetDesiredPosition( thePlayer.GetWorldPosition() );
+  moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
+
+  if (!player.IsInCombat()) {
+    player.smart_camera_data.time_before_target_fetch = -1;
+    player.smart_camera_data.combat_start_smoothing = 0;
+
+    return SC_onGameCameraTick_outOfCombat(player, moveData, delta);
+  }
+
+  if (!player.smart_camera_data.settings.is_enabled_in_combat) {
+    return false;
+  }
 
   player_position = player.GetWorldPosition();
   // 3 seconds 

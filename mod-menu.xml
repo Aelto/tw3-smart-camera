@@ -3,18 +3,25 @@
   <Group id="SCgeneral" displayName="Mods.sc_name">
     <PresetsArray>
       <Preset id="0" displayName="sc_defaults" >
-        <Entry varId="SCmodEnabled" value="1" />
+        <Entry varId="SCmodEnabledInCombat" value="1" />
+        <Entry varId="SCmodEnSCmodEnabledInExplorationabled" value="1" />
         <Entry varId="SCcameraZoom" value="0" />
         <Entry varId="SChorizontalSensitivity" value="1" />
         <Entry varId="SCoverallSpeed" value="2" />
+        <Entry varId="SCcameraFov" value="60" />
+        <Entry varId="SCcameraHeight" value="0.5" />
       </Preset>
     </PresetsArray>
 
     <VisibleVars>
-        <Var id="SCmodEnabled" displayName="sc_mod_enabled" displayType="TOGGLE" />
+        <Var id="SCmodEnabledInCombat" displayName="sc_mod_enabled_combat" displayType="TOGGLE" />
+        <Var id="SCmodEnabledInExploration" displayName="sc_mod_enabled_exploration" displayType="TOGGLE" />
         <Var id="SCcameraZoom" displayName="sc_camera_zoom" displayType="SLIDER;-10;10;20" />
         <Var id="SChorizontalSensitivity" displayName="sc_horizontal_sensitivity" displayType="SLIDER;0;10;100" />
         <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />
+        <Var id="SCcameraFov" displayName="sc_camera_fov" displayType="SLIDER;0;120;120" />
+        <Var id="SCcameraHeight" displayName="sc_camera_height" displayType="SLIDER;0;10;100" />
+        <Var id="SCcameraHorizontalPosition" displayName="sc_camera_horizontal_position" displayType="SLIDER;-10;10;100" />
     </VisibleVars>
   </Group>
 </UserConfig>

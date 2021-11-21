@@ -5,7 +5,11 @@
 2115722003|        |preset_Mods_sc_name|Smart Camera
 2115722004|        |preset_Mods_combat_sc_name|Smart Camera
 2115722005|        |preset_value_sc_defaults|Defaults
-2115722006|        |option_sc_mod_enabled|<font color="#30a14e">MOD ENABLED</font>
-2115722007|        |option_sc_camera_zoom|Camera zoom
-2115722008|        |option_sc_horizontal_sensitivity|Horizontal sensitivity
-2115722009|        |option_sc_overall_speed|Overall camera speed
+2115722006|        |option_sc_mod_enabled_combat|<font color="#30a14e">MOD ENABLED IN COMBAT</font>
+2115722007|        |option_sc_mod_enabled_exploration|<font color="#30a14e">MOD ENABLED IN EXPLORATION</font>
+2115722008|        |option_sc_camera_zoom|Camera zoom
+2115722009|        |option_sc_camera_fov|Camera FOV
+2115722010|        |option_sc_camera_height|Camera height
+2115722011|        |option_sc_camera_horizontal_position|Camera horizontal position
+2115722012|        |option_sc_horizontal_sensitivity|Horizontal sensitivity
+2115722013|        |option_sc_overall_speed|Overall camera speed
