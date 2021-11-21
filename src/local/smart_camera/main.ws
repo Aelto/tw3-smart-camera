@@ -122,7 +122,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     rotation_to_target = VecToRotation(target_position - player_position);
 
     // only if the creature is near the player
-    if (VecDistanceSquared2D(target_position, player_position) < 5 * 5
+    if (VecDistanceSquared2D(target_position, player_position) < 3 * 3
     // only if the creature is not already higher than the player
     && target_position.Z < player_position.Z + 1
     // only if the camera is not already looking down
