@@ -4,9 +4,7 @@
     <PresetsArray>
       <Preset id="0" displayName="sc_defaults" >
         <Entry varId="SCmodEnabled" value="1" />
-        <Entry varId="SCzoomOutMultiplier" value="1" />
-        <Entry varId="SCminZoomOut" value="0" />
-        <Entry varId="SCmaxZoomOut" value="100" />
+        <Entry varId="SCcameraZoom" value="1" />
         <Entry varId="SChorizontalSensitivity" value="1" />
         <Entry varId="SCoverallSpeed" value="1" />
       </Preset>
@@ -14,9 +12,7 @@
 
     <VisibleVars>
         <Var id="SCmodEnabled" displayName="sc_mod_enabled" displayType="TOGGLE" />
-        <Var id="SCzoomOutMultiplier" displayName="sc_zoom_out_multiplier" displayType="SLIDER;0;10;100" />
-        <Var id="SCminZoomOut" displayName="sc_min_zoom_out" displayType="SLIDER;0;100;100" />
-        <Var id="SCmaxZoomOut" displayName="sc_max_zoom_out" displayType="SLIDER;0;100;100" />
+        <Var id="SCcameraZoom" displayName="sc_camera_zoom" displayType="SLIDER;-10;10;20" />
         <Var id="SChorizontalSensitivity" displayName="sc_horizontal_sensitivity" displayType="SLIDER;0;10;100" />
         <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />
     </VisibleVars>
