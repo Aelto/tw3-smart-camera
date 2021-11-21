@@ -1,11 +1,9 @@
 
 function SC_reloadSettings(out settings: SC_settings) {
   settings.is_enabled = SC_isEnabled();
-  settings.zoom_out_multiplier = SC_getZoomOutMultiplier();
+  settings.camera_zoom = SC_getCameraZoom();
   settings.horizontal_sensitivity = SC_getHorizontalSensitivity();
   settings.overall_speed = SC_getOverallSpeed();
-  settings.min_zoom_out = SC_getMinZoomOut();
-  settings.max_zoom_out = SC_getMaxZoomOut();
 }
 
 function SC_isEnabled(): bool {
@@ -14,11 +12,11 @@ function SC_isEnabled(): bool {
     .GetVarValue('SCgeneral', 'SCmodEnabled');
 }
 
-function SC_getZoomOutMultiplier(): float {
+function SC_getCameraZoom(): float {
   return StringToFloat(
     theGame
     .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCzoomOutMultiplier')
+    .GetVarValue('SCgeneral', 'SCcameraZoom')
   );
 }
 
