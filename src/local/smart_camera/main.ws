@@ -66,7 +66,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   target_position = target.GetWorldPosition();
 
   mean_position = SC_getMeanPosition(positions, player);
-  is_mean_position_too_high = mean_position.Z - player_position.Z > 3;
+  is_mean_position_too_high = mean_position.Z - player_position.Z > 1.5;
 
   rotation = SC_getRotationToLookAtPosition(
     mean_position,
