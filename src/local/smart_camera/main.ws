@@ -36,7 +36,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   if (!player.IsInCombat()) {
     player.smart_camera_data.time_before_target_fetch = -1;
-    player.smart_camera_data.combat_start_smoothing = 0;
+    // player.smart_camera_data.combat_start_smoothing = 0;
 
     return SC_onGameCameraTick_outOfCombat(player, moveData, delta);
   }
@@ -259,6 +259,10 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
     camera_position - player_position
   );
 
+  if (positions.Size() == 0) {
+    return 0;
+  }
+
   for (i = 0; i < positions.Size(); i += 1) {
     current_angle = VecHeading(positions[i] - player_position);
     current_angle = AngleDistance(player_back_heading, current_angle);
@@ -281,9 +285,9 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
 
   return ClampF(
     VecDistance2D(mean_position, player_position) * -1,
-    -player.smart_camera_data.settings.camera_zoom,
-    player.smart_camera_data.settings.camera_zoom * -5,
-  );;
+    0,
+    (10 - MinF(player.smart_camera_data.settings.camera_zoom, 5)) * -0.5,
+  );
 }
 
 function SC_getMeanPosition(positions: array<Vector>, player: CR4Player): Vector {
