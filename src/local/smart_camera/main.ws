@@ -154,12 +154,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   else if (player.smart_camera_data.update_y_direction_duration > 0) {
     player.smart_camera_data.update_y_direction_duration -= delta * player.smart_camera_data.settings.overall_speed;
 
-    // player.smart_camera_data.desired_y_direction = LerpF(
-    //   delta * 0.1,
-    //   player.smart_camera_data.desired_y_direction,
-    //   moveData.pivotRotationValue.Pitch
-    // );
-
     moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.desired_y_direction );
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed,
@@ -185,11 +179,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.cameraLocalSpaceOffset.Y,
     back_offset
   );
-
-  // some hardcoded values to avoid the camera flying up for no reason
-  moveData.cameraLocalSpaceOffset.Z = LerpF(delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing, moveData.cameraLocalSpaceOffset.Z, 0);
-  moveData.pivotPositionController.offsetZ = LerpF(delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing, moveData.pivotPositionController.offsetZ, 1.3f);
-  //#endregion zoom correction
 
   return true;
 }
@@ -265,15 +254,6 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
 
     entities_count_in_back += 1;
     mean_position += positions[i];
-
-    // if the creature in right behind the camera then we add the position one
-    // more, but we don't increase the entities count so that it has a bigger
-    // impact on the mean vlaue.
-    // if (current_angle * current_angle > 60 * 60) {
-    //   continue;
-    // }
-
-    // mean_position += positions[i];
   }
 
   // no entities in the back, so there is no bonus offset
