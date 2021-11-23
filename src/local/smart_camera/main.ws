@@ -289,7 +289,9 @@ function SC_getRotationToLookAtPosition(mean_position: Vector, player: CR4Player
 }
 
 function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
+  var filtered_entities: array<CGameplayEntity>;
   var entities: array<CGameplayEntity>;
+  var i: int;
 
   FindGameplayEntitiesInRange(
     entities,
@@ -300,7 +302,15 @@ function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
     player
   );
 
-  return entities;
+  for (i = 0; i < entities.Size(); i += 1) {
+    if (((CActor)entities[i]).GetTarget() != player) {
+      continue;
+    }
+
+    filtered_entities.PushBack(entities[i]);
+  }
+
+  return filtered_entities;
 }
 
 function SC_getEntitiesPositions(entities: array<CGameplayEntity>): array<Vector> {
