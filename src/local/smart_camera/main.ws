@@ -83,6 +83,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // Yaw correction //
   ///////////////////
   //#region yaw correction
+  rotation.Yaw = LerpAngleF(0.5, rotation.Yaw, thePlayer.GetHeading());
 
   if (player.smart_camera_data.desired_x_direction != 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
