@@ -56,7 +56,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
       player.smart_camera_data.corrected_y_direction = LerpF(
         0.80,
         moveData.pivotRotationValue.Pitch,
-        180 * player_velocity.Z
+        90 * player_velocity.Z
       );
     }
 
