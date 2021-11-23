@@ -116,9 +116,16 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
     moveData.cameraLocalSpaceOffsetVel,
-    Vector(player.smart_camera_data.settings.camera_horizontal_position, -2 + player.smart_camera_data.settings.camera_zoom, player.smart_camera_data.settings.camera_height),
+    Vector(
+      // x axis: horizontal position, left to right
+      player.smart_camera_data.settings.camera_horizontal_position,
+      // y axis: horizontal position, front to back
+      4 - player.smart_camera_data.settings.camera_zoom,
+      // z axis: vertical position, bottom to top
+      player.smart_camera_data.settings.camera_height
+    ),
     0.5f,
-    delta
+    delta * player.smart_camera_data.exploration_start_smoothing
   );
   //#endregion zoom correction
 

@@ -174,10 +174,19 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // offset coming from the creatures behind the Camera's back.
   back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions);
 
-  moveData.cameraLocalSpaceOffset.Y = LerpF(
-    delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing,
-    moveData.cameraLocalSpaceOffset.Y,
-    back_offset
+  DampVectorSpring(
+    moveData.cameraLocalSpaceOffset,
+    moveData.cameraLocalSpaceOffsetVel,
+    Vector(
+      // x axis: horizontal position, left to right
+      player.smart_camera_data.settings.camera_horizontal_position,
+      // y axis: horizontal position, front to back
+      4 - player.smart_camera_data.settings.camera_zoom + back_offset + ((int)is_mean_position_too_high * -1),
+      // z axis: vertical position, bottom to top
+      player.smart_camera_data.settings.camera_height + ((int)is_mean_position_too_high * 0.2)
+    ),
+    0.5f,
+    delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing
   );
 
   return true;
