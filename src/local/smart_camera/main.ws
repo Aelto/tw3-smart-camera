@@ -118,6 +118,12 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       player.smart_camera_data.update_y_direction_duration = 1;
     }
 
+    rotation.Pitch = LerpAngleF(
+      0.2,
+      moveData.pivotRotationValue.Pitch,
+      rotation.Pitch
+    );
+
     moveData.pivotRotationController.SetDesiredPitch( rotation.Pitch );
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
