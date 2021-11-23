@@ -121,7 +121,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
       moveData.pivotRotationValue.Pitch,
-      rotation.Pitch
+      -rotation.Pitch
     );
   }
   // do pitch correction if the target is blocked by Geralt, but only if the 
