@@ -6,7 +6,6 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   }
 
   player_velocity = VecNormalize(player.GetMovingAgentComponent().GetVelocity());
-  LogChannel('SC', VecToString(player_velocity));
 
   player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
     * delta
@@ -47,8 +46,6 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   // Pitch correction //
   //////////////////////
   //#region pitch correction
-  LogChannel('SC', "Z = " + player_velocity.Z);
-  
   if (AbsF(player_velocity.Z) > 0.25) {
     if (player.smart_camera_data.pitch_correction_delay <= 0) {
       // player.smart_camera_data.desired_y_direction = moveData.pivotRotationValue.Pitch;
