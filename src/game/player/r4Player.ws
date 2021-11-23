@@ -4477,6 +4477,10 @@ statemachine abstract import class CR4Player extends CPlayer
 		var buff 		: CBaseGameplayEffect;
 		var runningAndAlertNear		: bool;
 		var desiredDist				: float;
+
+		// SmartCamera - BEGIN
+		return;
+		// SmartCamera - END
 	
 		if ( ( !IsCurrentSignChanneled() || GetCurrentlyCastSign() == ST_Quen || GetCurrentlyCastSign() == ST_Yrden ) && !specialAttackCamera && !IsInCombatActionFriendly() )
 		{
