@@ -46,22 +46,6 @@ function SC_getOverallSpeed(): float {
   );
 }
 
-function SC_getMinZoomOut(): float {
-  return StringToFloat(
-    theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCminZoomOut')
-  );
-}
-
-function SC_getMaxZoomOut(): float {
-  return StringToFloat(
-    theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCmaxZoomOut')
-  );
-}
-
 function SC_getCameraFov(): float {
   return StringToFloat(
     theGame
