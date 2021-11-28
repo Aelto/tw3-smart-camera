@@ -104,6 +104,18 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
+  // that's for when you're in combat but there are no enemies targetting Geralt
+  else {
+    rotation.Yaw = thePlayer.GetHeading();
+
+    moveData.pivotRotationValue.Yaw = LerpAngleF(
+      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+      moveData.pivotRotationValue.Yaw,
+      rotation.Yaw
+    );
+
+    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+  }
   //#endregion yaw correction
 
   //////////////////////

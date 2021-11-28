@@ -41,6 +41,22 @@ struct SC_data {
   var corrected_y_direction: float;
 
   var pitch_correction_delay: float;
+
+  var horse_auto_center_enabled: bool;
+
+  /**
+   * a cursor is a float value that can be positive as well as negative and is
+   * changed based on multiple factors.
+   * Then depending on the value of the cursor actions are applied, for example
+   * if the cursor is a positive value then it will apply yaw correction. But
+   * it won't if it's negative.
+   *
+   * Cursors are great with LerpF to add some delays on corrections with a
+   * smooth transition.
+   */
+  var yaw_correction_cursor: float;
+
+  var interaction_focus_cursor: float;
 }
 
 struct SC_settings {
