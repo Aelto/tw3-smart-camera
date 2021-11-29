@@ -83,7 +83,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // Yaw correction //
   ///////////////////
   //#region yaw correction
-  rotation.Yaw = LerpAngleF(0.5, rotation.Yaw, thePlayer.GetHeading());
+  if (!player.IsCurrentlyDodging()) {
+    rotation.Yaw = LerpAngleF(0.2, rotation.Yaw, thePlayer.GetHeading());
+  }
 
   if (player.smart_camera_data.desired_x_direction != 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
@@ -95,7 +97,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
-  else if (player.smart_camera_data.nearby_targets.Size() && PowF(AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw), 2) > 4) {
+  else if (player.smart_camera_data.nearby_targets.Size()) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta
         * player.smart_camera_data.settings.overall_speed
@@ -120,6 +122,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
   //#endregion yaw correction
+
 
   //////////////////////
   // Pitch correction //
@@ -147,7 +150,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     );
   }
   // do pitch correction if the target is blocked by Geralt, but only if the 
-  // pitch is not lower than it current one.
+  // pitch is not lower than the current one.
   // As pitch goes down, camera looks further down.
   else if (!player.IsInCombatAction() && SC_shouldLowerPitch(player, target)) {
     rotation_to_target = VecToRotation(target_position - player_position);
@@ -233,34 +236,6 @@ function SC_shouldLowerPitch(player: CR4Player, target: CActor): bool {
   return distance * distance < 10 * 10;
 }
 
-function SC_getVelocityOffset(player: CR4Player): Vector {
-  var player_to_camera_heading: float;
-  var player_velocity: Vector;
-  var angle_distance: float;
-  var multiplier: float;
-
-  player_to_camera_heading = VecHeading(
-    theCamera.GetCameraPosition() - player.GetWorldPosition()
-  );
-
-  player_velocity = player.GetMovingAgentComponent().GetVelocity();
-
-  angle_distance = AngleDistance(
-    VecHeading(player_velocity),
-    player_to_camera_heading
-  );
-
-  // slowly decreases the velocity offset as the velocity gets closer towards the
-  // camera.
-  multiplier = MinF(angle_distance, 180) / 180;
-
-  if (player.IsInCombatAction()) {
-    return player_velocity * 0.5 * multiplier * 0.2;
-  }
-
-  return player_velocity * 0.5 * multiplier;
-}
-
 function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position: Vector, positions: array<Vector>): float {
   var entities_count_in_back: float;
   var player_back_heading: float;
@@ -314,7 +289,7 @@ function SC_getMeanPosition(positions: array<Vector>, player: CR4Player): Vector
   }
 
   mean_position /= i;
-  mean_position += SC_getVelocityOffset(player);
+  // mean_position += SC_getVelocityOffset(player);
 
   return mean_position;
 }
