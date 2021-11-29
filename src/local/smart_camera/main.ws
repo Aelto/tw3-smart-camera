@@ -97,7 +97,10 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
   else if (player.smart_camera_data.nearby_targets.Size() && PowF(AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw), 2) > 4) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+      delta
+        * player.smart_camera_data.settings.overall_speed
+        * player.smart_camera_data.combat_start_smoothing
+        * 2,
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
     );

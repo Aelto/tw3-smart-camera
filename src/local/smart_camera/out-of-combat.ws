@@ -20,10 +20,10 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     SC_applyClueInteractionOffset(rotation, position_offset, player);
   }
 
-  rotation = SC_getUpdatedRotationToLookAtTarget(rotation, player, delta);
-
   player_velocity = VecNormalize(player.GetMovingAgentComponent().GetVelocity());
   player_speed = player.GetMovingAgentComponent().GetSpeed();
+
+  rotation = SC_getUpdatedRotationToLookAtTarget(rotation, player, delta, player_speed);
 
   player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
     * delta
@@ -59,7 +59,11 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
 
   if (player.smart_camera_data.yaw_correction_cursor > 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.exploration_start_smoothing * player.smart_camera_data.yaw_correction_cursor,
+      delta
+        * player.smart_camera_data.settings.overall_speed
+        * player.smart_camera_data.exploration_start_smoothing
+        * player.smart_camera_data.yaw_correction_cursor
+        * 1.5,
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
     );
@@ -150,7 +154,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     moveData.pivotRotationValue.Roll = LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed,
       moveData.pivotRotationValue.Roll,
-      angle_distance * 0.001 * player_speed
+      angle_distance * 0.005 * player_speed
     );
 
     // moveData.pivotRotationController.SetDesiredHeading(angle_distance * 0.1);
@@ -210,7 +214,7 @@ function SC_applyClueInteractionOffset(out rotation: EulerAngles, out position_o
   position_offset.Z += -1;
 }
 
-function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4Player, delta: float): EulerAngles {
+function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4Player, delta: float, player_speed: float): EulerAngles {
   var interaction_target: CInteractionComponent;
   var interaction_entity: CGameplayEntity;
   var rotation_to_target: EulerAngles;
@@ -242,13 +246,13 @@ function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4P
     rotation_to_target = VecToRotation(target_position - theCamera.GetCameraPosition());
 
     rotation.Yaw = LerpAngleF(
-      0.15,
+      0.30 / (1 + player_speed),
       rotation.Yaw,
       rotation_to_target.Yaw
     );
 
     rotation.Pitch = LerpAngleF(
-      0.15,
+      0.30 / (1 + player_speed),
       rotation.Pitch,
       -rotation_to_target.Pitch
     );
