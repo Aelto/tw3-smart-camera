@@ -51,28 +51,6 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   }
   //#endregion yaw correction
 
-  ////////////////////
-  // Roll correction //
-  ///////////////////
-  //#region roll correction
-  if (player_speed > 0) {
-    moveData.pivotRotationValue.Roll = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed,
-      moveData.pivotRotationValue.Roll,
-      angle_distance * 0.005 * player_speed
-    );
-
-    // moveData.pivotRotationController.SetDesiredHeading(angle_distance * 0.1);
-  }
-  else {
-    moveData.pivotRotationValue.Roll = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed,
-      moveData.pivotRotationValue.Roll,
-      0
-    );
-  }
-  //#endregion roll correction
-
   return false;
 }
 
