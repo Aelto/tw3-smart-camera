@@ -42,7 +42,7 @@ function SC_getOverallSpeed(): float {
   return StringToFloat(
     theGame
     .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SChorizontalSensitivity')
+    .GetVarValue('SCgeneral', 'SCoverallSpeed')
   );
 }
 
