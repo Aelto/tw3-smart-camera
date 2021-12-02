@@ -3,8 +3,8 @@ A mod that controls the camera positioning during combat so that you don't have 
 manage it yourself. Mainly aimed at gamepads.
 
 # Showcase
-[Horse camera demo](https://www.youtube.com/watch?v=5oB2PaFDnbI)
-[Combat camera demo](https://www.youtube.com/watch?v=Rky3QMizNRs)
+ - [Horse camera demo](https://www.youtube.com/watch?v=5oB2PaFDnbI)
+ - [Combat camera demo](https://www.youtube.com/watch?v=Rky3QMizNRs)
 
 # Installing
 The mod is modular, you can choose to install the core version (the fight camera) without the horse camera. However it is not possible to do the opposite as the horse camera depends on the combat camera.
