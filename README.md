@@ -3,4 +3,14 @@ A mod that controls the camera positioning during combat so that you don't have 
 manage it yourself. Mainly aimed at gamepads.
 
 # Showcase
-[Youtube demo](https://www.youtube.com/watch?v=sLEMGQzFfjA), the zoom-out was amplified for demo purpose.
+[Horse camera demo](https://www.youtube.com/watch?v=5oB2PaFDnbI)
+[Combat camera demo](https://www.youtube.com/watch?v=Rky3QMizNRs)
+
+# Installing
+The mod is modular, you can choose to install the core version (the fight camera) without the horse camera. However it is not possible to do the opposite as the horse camera depends on the combat camera.
+
+ - Download "SmartCamera Core" and/or "SmartCamera Horse"
+ - Drop the `mods`, `dlc` and `bin` folders of the release inside you Witcher 3 directory in order to merge them with your current mods/dlc/bin folders.
+ - Merge the scripts with your script-merger of your choice
+ - Launch the game, open the mod menu and apply the default preset
+ - Load a save and confirm everything is working as intended
