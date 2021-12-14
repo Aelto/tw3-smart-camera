@@ -68,9 +68,9 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
       // x axis: horizontal position, left to right
       0,
       // y axis: horizontal position, front to back
-      0 + absolute_angle_distance * horse_speed * 0.02 * (float)player.smart_camera_data.horse_auto_center_enabled,
+      -2 + absolute_angle_distance * horse_speed * 0.02 * (float)player.smart_camera_data.horse_auto_center_enabled,
       // z axis: vertical position, bottom to top
-      player.smart_camera_data.settings.camera_height + 1
+      0.25
     ),
     0.5f,
     delta

@@ -84,7 +84,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   ///////////////////
   //#region yaw correction
   if (!player.IsCurrentlyDodging()) {
-    rotation.Yaw = LerpAngleF(0.2, rotation.Yaw, thePlayer.GetHeading());
+    // rotation.Yaw = LerpAngleF(0.2, rotation.Yaw, thePlayer.GetHeading());
   }
 
   if (player.smart_camera_data.desired_x_direction != 0) {
