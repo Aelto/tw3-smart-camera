@@ -4,7 +4,7 @@
     <PresetsArray>
       <Preset id="0" displayName="sc_defaults" >
         <Entry varId="SCmodEnabledInCombat" value="1" />
-        <Entry varId="SCmodEnSCmodEnabledInExplorationabled" value="1" />
+        <Entry varId="SCmodEnabledInExploration" value="1" />
         <Entry varId="SChorizontalSensitivity" value="1" />
         <Entry varId="SCcameraZoom" value="3.5" />
         <Entry varId="SCoverallSpeed" value="2" />
