@@ -65,6 +65,7 @@ struct SC_settings {
    */
   var is_enabled_in_combat: bool;
   var is_enabled_in_exploration: bool;
+  var is_enabled_on_horse: bool;
 
   var camera_zoom: float;
 

@@ -5,6 +5,7 @@
       <Preset id="0" displayName="sc_defaults" >
         <Entry varId="SCmodEnabledInCombat" value="1" />
         <Entry varId="SCmodEnabledInExploration" value="1" />
+        <Entry varId="SCmodEnabledOnHorse" value="1" />
         <Entry varId="SChorizontalSensitivity" value="1" />
         <Entry varId="SCcameraZoom" value="3.5" />
         <Entry varId="SCoverallSpeed" value="2" />
@@ -16,6 +17,7 @@
     <VisibleVars>
         <Var id="SCmodEnabledInCombat" displayName="sc_mod_enabled_combat" displayType="TOGGLE" />
         <Var id="SCmodEnabledInExploration" displayName="sc_mod_enabled_exploration" displayType="TOGGLE" />
+        <Var id="SCmodEnabledOnHorse" displayName="sc_mod_enabled_horse" displayType="TOGGLE" />
         <Var id="SChorizontalSensitivity" displayName="sc_horizontal_sensitivity" displayType="SLIDER;0;10;100" />
         <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />
         <Var id="SCcameraZoom" displayName="sc_camera_zoom" displayType="SLIDER;0;10;100" />

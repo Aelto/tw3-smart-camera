@@ -4,6 +4,10 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   var horse_speed: float;
   var absolute_angle_distance: float;
 
+  if (!player.smart_camera_data.settings.is_enabled_on_horse) {
+    return false;
+  }
+
   rotation = moveData.pivotRotationValue;
   horse_speed = horse.InternalGetSpeed();
 
@@ -70,7 +74,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
       // y axis: horizontal position, front to back
       -2 + absolute_angle_distance * horse_speed * 0.02 * (float)player.smart_camera_data.horse_auto_center_enabled,
       // z axis: vertical position, bottom to top
-      0.25
+      0.2
     ),
     0.5f,
     delta
