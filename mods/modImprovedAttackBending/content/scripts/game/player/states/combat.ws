@@ -94,10 +94,7 @@ state Combat in CR4Player extends ExtendedMovable
 	
 	
 	
-	private var dynamicStance : bool;
-	private var inFrameCheck : bool;
-	private var stanceDistSmall : int;
-	private var stanceDistLarge : int;
+	
 	event OnEnterState( prevStateName : name )
 	{
 		var i : int;
@@ -109,14 +106,16 @@ state Combat in CR4Player extends ExtendedMovable
 		parent.AddAnimEventCallback('PunchHand_Right',	'OnAnimEvent_PunchHand');
 		
 		super.OnEnterState(prevStateName);
+			
 		
-		dynamicStance = Options().CombatState();
-		inFrameCheck = Options().InFrameCheck();
-		stanceDistSmall = Options().StanceDistSmall();
-		stanceDistLarge = Options().StanceDistLarge();
 		
 		parent.AddTimer( 'CombatComboUpdate', 0, true, false,  TICK_PrePhysics );
 		parent.AddTimer( 'CombatEndCheck', 0.1f, true );
+		
+		
+		
+		
+		
 		
 		parent.SetBehaviorMimicVariable( 'gameplayMimicsMode', (float)(int)PGMM_Combat );
 		
@@ -189,7 +188,7 @@ state Combat in CR4Player extends ExtendedMovable
 		
 		
 		
-		parent.AddTimer( 'CombatLoop', 0.1f, true );
+		parent.AddTimer( 'CombatLoop', 0, true );
 		
 	}
 		
@@ -249,12 +248,7 @@ state Combat in CR4Player extends ExtendedMovable
 		{
 			if( timeToCheckCombatEndCur < 0.0f )
 			{
-				// W3EE - Begin
-				if( !parent.IsGuarded() )
-				{
-					parent.GoToExplorationIfNeeded();
-				}
-				// W3EE - End
+				parent.GoToExplorationIfNeeded(); 
 			}
 			else
 			{
@@ -367,14 +361,7 @@ state Combat in CR4Player extends ExtendedMovable
 		
 		if( parent.movementLockType == PMLT_NoRun && !GetWitcherPlayer().HasBuff( EET_Mutation11Immortal ) )
 		{			
-			//ImmersiveCam++
-			if( parent.ic.comLock )
-			{
-				UpdateCameraLockedCombat( moveData, dt );
-				return true;
-			}
-			//ImmersiveCam--
-			else if ( enemies.Size() == 1 )
+			if ( enemies.Size() == 1 )
 			{
 				if ( parent.IsCombatMusicEnabled() || parent.GetPlayerMode().GetForceCombatMode() )
 					UpdateCameraInterior( moveData, dt );
@@ -406,13 +393,7 @@ state Combat in CR4Player extends ExtendedMovable
 			UpdateCameraInterior( moveData, dt );
 			return true;
 		}			
-		// ImmersiveCam++
-		else if( parent.ic.comLock )
-		{
-			UpdateCameraLockedCombat( moveData, dt );
-			return true;
-		}
-		//ImmersiveCam--
+		
 		if ( parent.GetPlayerCombatStance() == PCS_AlertNear )
 		{
 			if ( enemies.Size() <= 1 && parent.moveTarget)
@@ -431,23 +412,6 @@ state Combat in CR4Player extends ExtendedMovable
 		super.OnGameCameraPostTick( moveData, dt );
 	}
 
-	//ImmersiveCam++
-	protected function UpdateCameraLockedCombat( out moveData : SCameraMovementData, timeDelta : float )
-	{
-		theGame.GetGameCamera().ChangePivotRotationController( 'CombatInterior' );
-		theGame.GetGameCamera().ChangePivotDistanceController( 'Default' );
-		theGame.GetGameCamera().ChangePivotPositionController( 'Default' );		
-		
-		moveData.pivotRotationController = theGame.GetGameCamera().GetActivePivotRotationController();
-		moveData.pivotDistanceController = theGame.GetGameCamera().GetActivePivotDistanceController();
-		moveData.pivotPositionController = theGame.GetGameCamera().GetActivePivotPositionController();
-		
-		moveData.pivotPositionController.SetDesiredPosition( parent.GetWorldPosition(), interiorCameraDesiredPositionMult); 
-		moveData.pivotDistanceController.SetDesiredDistance( 3.30f );
-		
-		moveData.pivotPositionController.offsetZ = 1.50f;
-	}
-	//ImmersiveCam--
 	
 	private function ProcessPlayerOrientation()
 	{
@@ -505,48 +469,7 @@ state Combat in CR4Player extends ExtendedMovable
 		if ( newOrientationTarget != parent.GetOrientationTarget() )
 			parent.SetOrientationTarget( newOrientationTarget );
 	}
-	
-	protected function IsHostileInRange() : bool
-	{
-		var ents : array<CGameplayEntity>;
-		var targetDistance : float;
-		var displayTarget : CActor;
-		var i : int;
 		
-		if( !dynamicStance )
-			return true;
-			
-		displayTarget = (CActor)parent.GetDisplayTarget();
-		if( parent.IsActorLockedToTarget() && displayTarget )
-		{
-			targetDistance = VecLength(displayTarget.GetNearestPointInPersonalSpace(parent.GetWorldPosition()) - parent.GetWorldPosition());
-			if( targetDistance <= stanceDistSmall || (displayTarget.IsHuge() && targetDistance <= stanceDistLarge) )
-			{
-				if( !inFrameCheck || (inFrameCheck && parent.WasVisibleInScaledFrame(displayTarget, 1.f, 1.f)) )
-					return true;
-			}
-			
-			return false;
-		}
-		
-		FindGameplayEntitiesInRange(ents, parent, (float)stanceDistLarge, 25,, FLAG_ExcludeTarget + FLAG_Attitude_Hostile + FLAG_OnlyAliveActors, parent);
-		if( ents.Size() )
-		{
-			for(i=0; i<ents.Size(); i+=1)
-			{
-				displayTarget = (CActor)ents[i];
-				targetDistance = VecLength(displayTarget.GetNearestPointInPersonalSpace(parent.GetWorldPosition()) - parent.GetWorldPosition());
-				if( targetDistance <= stanceDistSmall || (displayTarget.IsHuge() && targetDistance <= stanceDistLarge) )
-				{
-					if( !inFrameCheck || (inFrameCheck && parent.WasVisibleInScaledFrame(displayTarget, 1.f, 1.f)) )
-						return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-	
 	protected function ProcessPlayerCombatStance()
 	{	
 		var targetCapsuleHeight		: float;
@@ -557,22 +480,15 @@ state Combat in CR4Player extends ExtendedMovable
 		var moveTargetNPC			: CNewNPC;
 	
 		
+		
 		if( GetWitcherPlayer() && GetWitcherPlayer().HasBuff( EET_Mutation11Buff ) )
 		{
 			return;
 		}
-		
-		if( thePlayer.IsGuarded() )
-			SetStance(PCS_Guarded);
-		else
-		if( IsHostileInRange() )
-			SetStance(PCS_AlertNear);
-		else
-			SetStance(PCS_AlertFar);
-			
-		/*parent.findMoveTargetDistMin = 10.f;
+	
+		parent.findMoveTargetDistMin = 10.f;
 		moveTargetNPC = (CNewNPC)(parent.moveTarget);
-		if ( virtual_parent.GetPlayerCombatStance() == PCS_AlertNear || virtual_parent.GetPlayerCombatStance() == PCS_AlertFar )
+		if ( virtual_parent.GetPlayerCombatStance() == PCS_AlertNear || virtual_parent.GetPlayerCombatStance() == PCS_Guarded )
 			parent.findMoveTargetDist = parent.findMoveTargetDistMax;
 		else
 			parent.findMoveTargetDist = parent.findMoveTargetDistMin;
@@ -587,9 +503,7 @@ state Combat in CR4Player extends ExtendedMovable
 			playerToTargetVector = parent.moveTarget.GetNearestPointInPersonalSpace( parent.GetWorldPosition() ) - parent.GetWorldPosition();
 			playerToTargetDist = VecLength( playerToTargetVector );
 			if (  playerToTargetDist <= parent.findMoveTargetDist )
-			{
 				stance = PCS_AlertNear;
-			}
 			else 
 			{
 				if ( parent.findMoveTargetDist <= parent.findMoveTargetDistMin ) 
@@ -601,35 +515,23 @@ state Combat in CR4Player extends ExtendedMovable
 						parent.findMoveTargetDist = parent.findMoveTargetDistMin;
 						
 						if ( playerToTargetDist <= parent.findMoveTargetDist )
-						{
 							stance = PCS_AlertNear;
-						}
 						else
-						{
 							stance = PCS_AlertFar;
-						}
 					}
 					else
-					{
 						stance = PCS_AlertFar;
-					}
 				}				
 				else	
-				{
-					stance = PCS_AlertNear;
-				}
+					stance = PCS_AlertFar;
 			}
 		}
 		else if ( moveTargetNPC && moveTargetNPC.GetCurrentStance() == NS_Fly )
 		{
 			if ( AbsF( playerToTargetVector.Z ) < 25 && VecLength2D( playerToTargetVector ) < parent.findMoveTargetDist * 2.f )
-			{
 				stance = PCS_AlertNear;
-			}
 			else	
-			{
-				stance = PCS_AlertFar;
-			}
+				stance = PCS_AlertFar;				
 		}
 		else if ( parent.IsCastingSign() && !parent.IsInCombat() )
 			stance = PCS_Normal;
@@ -642,27 +544,21 @@ state Combat in CR4Player extends ExtendedMovable
 		if ( !parent.IsEnemyVisible( parent.moveTarget ) )
 		{
 			if ( virtual_parent.GetPlayerCombatStance() == PCS_AlertNear || parent.IsInCombat() )
-			{
 				stance = PCS_AlertFar;
-			}
 		}
 	
 		
 		if ( thePlayer.GetFlyingBossCamera() )
-		{
 			stance = PCS_AlertNear;
-		}
 		
 		if ( parent.IsGuarded() )
 			stance = PCS_Guarded;
 		else if ( stance == PCS_Guarded )
-		{
 			stance = PCS_AlertFar;
-		}
-		
+			
 		if ( !parent.IsThreatened() )	
 			stance = PCS_Normal;	
-			
+		
 		if( FactsQuerySum("force_stance_normal") > 0 )
 		{
 			stance = PCS_Normal;
@@ -676,7 +572,7 @@ state Combat in CR4Player extends ExtendedMovable
 				SetStance( stance ); 
 		}
 		else
-			SetStance( stance );*/
+			SetStance( stance );
 	}
 	
 	var cachedStance 				: EPlayerCombatStance;
@@ -764,40 +660,26 @@ state Combat in CR4Player extends ExtendedMovable
 		var aerondight		: W3Effect_Aerondight;
 		var weaponId		: SItemUniqueId;
 		
-		// W3EE - Begin
-		if( Combat().SeveranceRunewordRangeExtension() )
+		if(parent.HasAbility('Runeword 2 _Stats', true))
 		{
-			if( data.attackName == 'attack_heavy_special' )
+			if(data.attackName == 'attack_heavy_special')
 			{
 				data.rangeName = 'runeword2_heavy';		
 				weaponEntity = thePlayer.inv.GetItemEntityUnsafe(thePlayer.inv.GetItemFromSlot(data.weaponSlot));
 				weaponEntity.PlayEffectSingle('heavy_trail_extended_fx');
 			}
-			else if( data.attackName == 'attack_light_special' )
+			else if(data.attackName == 'attack_light_special')
 			{
 				data.rangeName = 'runeword2_light';		
 				weaponEntity = thePlayer.inv.GetItemEntityUnsafe(thePlayer.inv.GetItemFromSlot(data.weaponSlot));
 				weaponEntity.PlayEffectSingle('light_trail_extended_fx');
 			}
 		}
-		else if( parent.HasAbility( 'Runeword 11 _Stats', true ) && (W3PlayerWitcher)parent && !Options().DisableSpecialSwordFx() )
-		{
-			weaponEntity = thePlayer.inv.GetItemEntityUnsafe(thePlayer.inv.GetItemFromSlot(data.weaponSlot));
-			weaponEntity.PlayEffect('bereavement_trail');
-		}
-		else if( (parent.HasAbility( 'Runeword 10 _Stats', true ) || parent.HasAbility( 'Runeword 4 _Stats', true )) && (W3PlayerWitcher)parent )
-		{
-			weaponEntity = thePlayer.inv.GetItemEntityUnsafe(thePlayer.inv.GetItemFromSlot(data.weaponSlot));
-			weaponEntity.PlayEffectSingle('runeword1_fire_trail');
-		}
-		/*
 		else if(parent.HasAbility('Runeword 1 _Stats', true) && (W3PlayerWitcher)parent && GetWitcherPlayer().GetRunewordInfusionType() == ST_Igni)
 		{
 			weaponEntity = thePlayer.inv.GetItemEntityUnsafe(thePlayer.inv.GetItemFromSlot(data.weaponSlot));
 			weaponEntity.PlayEffectSingle('runeword1_fire_trail');
 		}
-		*/
-		// W3EE - End
 		else if( parent.HasBuff( EET_Aerondight ) )
 		{
 			weaponId = thePlayer.inv.GetCurrentlyHeldSword();
@@ -859,10 +741,6 @@ state Combat in CR4Player extends ExtendedMovable
 	var turnInPlaceBeforeDodge	: bool;
 	entry function PerformEvade( playerEvadeType : EPlayerEvadeType, isRolling : bool )
 	{
-		// ImmersiveCam++
-		var ic 							: icControl;
-		// ImmersiveCam--
-		
 		var rawDodgeHeading				: float;
 		var predictedDodgePos			: Vector;
 		var lineWidth					: float;
@@ -890,14 +768,13 @@ state Combat in CR4Player extends ExtendedMovable
 		var targetCapsuleRadius 		: float;
 		var perkStats 					: SAbilityAttributeValue;
 		
-		// ImmersiveCam++
-		ic = thePlayer.ic;
-		// ImmersiveCam--
+		
 		
 		parent.ResetUninterruptedHitsCount();		
 		parent.SetIsCurrentlyDodging(true, isRolling);
+	
 		parent.RemoveTimer( 'UpdateDodgeInfoTimer' );
-		
+
 		if ( parent.IsHardLockEnabled() && parent.GetTarget() )
 			evadeTarget = parent.GetTarget();
 		else
@@ -1071,8 +948,8 @@ state Combat in CR4Player extends ExtendedMovable
 				parent.DrainStamina(ESAT_Dodge);
 		}
 		
-		// W3EE - Begin
-		/*if( parent.CanUseSkill(S_Perk_21) )
+		
+		if( parent.CanUseSkill(S_Perk_21) )
 		{
 			if( isRolling )
 			{
@@ -1082,8 +959,7 @@ state Combat in CR4Player extends ExtendedMovable
 			{
 				GetWitcherPlayer().GainAdrenalineFromPerk21( 'dodge' );
 			}
-		}*/
-		// W3EE - End
+		}
 		
 		if ( dodgeDirection == PED_Forward )
 		{
@@ -1138,10 +1014,8 @@ state Combat in CR4Player extends ExtendedMovable
 		parent.SetBehaviorVariable(	'turnInPlaceBeforeDodge', 0.f ) ;
 		parent.SetBehaviorVariable(	'isRolling', (int)isRolling ) ;
 		
-		// W3EE - Begin
 		if ( turnInPlaceBeforeDodge )
 			parent.SetBehaviorVariable(	'turnInPlaceBeforeDodge', 1.f ) ;
-		// W3EE - End
 			
 		if ( parent.RaiseForceEvent( 'CombatAction' ) )
 			virtual_parent.OnCombatActionStart();
@@ -1492,38 +1366,6 @@ state Combat in CR4Player extends ExtendedMovable
 		
 		comboAspectName = aspectName;
 	}
-	
-	// W3EE - Begin
-	var W3EEComboDef : W3EEComboDefinition;
-	public final function BuildComboWitcher( attackType : name, fistAnim : bool )
-	{
-		if( !W3EEComboDef )
-		{
-			W3EEComboDef = new W3EEComboDefinition in this;
-			W3EEComboDef.Init();
-		}
-		
-		if( W3EEComboDef.GetIsActive() )
-		{
-			W3EEComboDef.Update(attackType, fistAnim);
-			comboDefinition = W3EEComboDef.GetComboDefinition();
-			
-			comboPlayer = new CComboPlayer in this;
-			if ( !comboPlayer.Build( comboDefinition, parent ) )
-			{
-				LogChannel( 'ComboNode', "Error: BuildCombo" );	
-			}
-			comboPlayer.SetDurationBlend( 0.2f );
-			
-			CleanUpComboStuff();
-			comboPlayer.Init();
-		}
-		else
-		{
-			BuildComboPlayer();
-		}
-	}
-	// W3EE - End
 	
 	public final function BuildComboPlayer()
 	{
@@ -1876,26 +1718,14 @@ state Combat in CR4Player extends ExtendedMovable
 		{		
 			parent.GetMovingAgentComponent().GetMovementAdjustor().CancelAll();
 
-			//W3EE - Begin
-			witcher = (W3PlayerWitcher)parent;
-			if( witcher )
-			{
-				BuildComboWitcher(playerAttackType, parent.GetCurrentStateName() == 'CombatFists');
-			}
-			else
 			if ( !comboPlayer )
 			{
 				BuildComboPlayer();
 				
 				
 			}		
-			
-			
-			enableSoftLock = Options().LockOn() || parent.IsHardLockEnabled();
-			
-			// enableSoftLock = true;
-			//W3EE - End
-			
+
+			enableSoftLock = true;
 			if ( parent.IsInCombat() 
 				&& thePlayer.IsSprintActionPressed()
 				&& !parent.bLAxisReleased
@@ -1933,7 +1763,6 @@ state Combat in CR4Player extends ExtendedMovable
 				playerToTargetVec = parent.GetWorldPosition() - noSlideTargetPos;
 			}			
 			
-			
 			if( playerAttackType == theGame.params.ATTACK_NAME_LIGHT )
 			{
 				if (npc)
@@ -1941,75 +1770,51 @@ state Combat in CR4Player extends ExtendedMovable
 				
 				if ( parent.GetCurrentStateName() == 'CombatFists' )
 				{
-					// W3EE - Begin
-					if( W3EEComboDef.GetIsActive() )
+					if ( parent.slideTarget )
 					{
-						comboPlayer.PlayAttack('AttackFistFast');
+						if ( !attackTarget || !parent.IsThreat(attackTarget) )
+							comboPlayer.PlayAttack( 'AttackLightNoTarget' );
+						else
+						{
+							
+								comboPlayer.PlayAttack( 'AttackLight' );
+						}
 					}
 					else
-					{
-						if ( parent.slideTarget )
-						{
-							if ( !attackTarget || !parent.IsThreat(attackTarget) )
-								comboPlayer.PlayAttack( 'AttackLightNoTarget' );
-							else
-							{
-								
-									comboPlayer.PlayAttack( 'AttackLight' );
-							}
-						}
-						else
-							comboPlayer.PlayAttack( 'AttackLightNoTarget' );
-					}
-					// W3EE - End
+						comboPlayer.PlayAttack( 'AttackLightNoTarget' );
 				}
 				else
 				{	
-					// W3EE - Begin
-					if( W3EEComboDef.GetIsActive() )
+					if ( npc && npc.IsUsingHorse() )
+						comboPlayer.PlayAttack('AttackLightVsRider');
+					else if  ( !parent.IsInShallowWater() && npc && ( npc.GetCurrentStance() == NS_Fly || npc.IsInAir() ) ) 
 					{
-						if( Combat().IsUsingBattleAxe() || Combat().IsUsingBattleMace() )
-							comboPlayer.PlayAttack('AttackBattleAxeFast');
+						if ( playerToTargetVec.Z >= 0.f )
+							comboPlayer.PlayAttack( 'AttackLightFlying' );
 						else
-						if( Combat().IsUsingSecondaryWeapon() )
-							comboPlayer.PlayAttack('AttackLightSecondary');
-						else
-							comboPlayer.PlayAttack('AttackLightReal');
+							comboPlayer.PlayAttack( 'AttackLightSlopeDown' );
 					}
 					else
-					{
-						if ( npc && npc.IsUsingHorse() )
-							comboPlayer.PlayAttack('AttackLightVsRider');
-						else if  ( !parent.IsInShallowWater() && npc && ( npc.GetCurrentStance() == NS_Fly || npc.IsInAir() ) ) 
-						{
-							if ( playerToTargetVec.Z >= 0.f )
-								comboPlayer.PlayAttack( 'AttackLightFlying' );
-							else
-								comboPlayer.PlayAttack( 'AttackLightSlopeDown' );
-						}
+					{	
+						if (attackTarget)
+							targetCapsuleHeight = ((CMovingPhysicalAgentComponent)attackTarget.GetMovingAgentComponent()).GetCapsuleHeight();
 						else
-						{	
-							if (attackTarget)
-								targetCapsuleHeight = ((CMovingPhysicalAgentComponent)attackTarget.GetMovingAgentComponent()).GetCapsuleHeight();
-							else
-								targetCapsuleHeight = 0;
-								
-							playerToTargetRot = VecToRotation( playerToTargetVec );
+							targetCapsuleHeight = 0;
 							
-							 if ( ( playerToTargetVec.Z > 0.4f && AbsF( playerToTargetRot.Pitch ) > 12.f ) || parent.IsInShallowWater() )
-								comboPlayer.PlayAttack( 'AttackLightSlopeUp' );						
-							else if ( playerToTargetVec.Z < -0.35f && AbsF( playerToTargetRot.Pitch ) > 12.f  )
-								comboPlayer.PlayAttack( 'AttackLightSlopeDown' );
-							
-							else if ( !parent.slideTarget )
-								comboPlayer.PlayAttack( 'AttackLight' );
-							else if ( targetCapsuleHeight < 1.5 )
-								comboPlayer.PlayAttack( 'AttackLightCapsuleShort' );
-							else
-								comboPlayer.PlayAttack( 'AttackLight' );
-						}
+						playerToTargetRot = VecToRotation( playerToTargetVec );
+						
+						 if ( ( playerToTargetVec.Z > 0.4f && AbsF( playerToTargetRot.Pitch ) > 12.f ) || parent.IsInShallowWater() )
+							comboPlayer.PlayAttack( 'AttackLightSlopeUp' );						
+						else if ( playerToTargetVec.Z < -0.35f && AbsF( playerToTargetRot.Pitch ) > 12.f  )
+							comboPlayer.PlayAttack( 'AttackLightSlopeDown' );
+						
+						else if ( !parent.slideTarget )
+							comboPlayer.PlayAttack( 'AttackLight' );
+						else if ( targetCapsuleHeight < 1.5 )
+							comboPlayer.PlayAttack( 'AttackLightCapsuleShort' );
+						else
+							comboPlayer.PlayAttack( 'AttackLight' );
 					}
-					// W3EE - End
 				}
 				
 				virtual_parent.OnCombatActionStart();
@@ -2021,59 +1826,38 @@ state Combat in CR4Player extends ExtendedMovable
 			
 				if ( parent.GetCurrentStateName() == 'CombatFists' )
 				{
-					// W3EE - Begin
-					if( W3EEComboDef.GetIsActive() )
+					if ( parent.slideTarget )
 					{
-						comboPlayer.PlayAttack('AttackFistHeavy');
+						if ( !attackTarget || !parent.IsThreat(attackTarget) )
+							comboPlayer.PlayAttack( 'AttackHeavyNoTarget' );
+						else
+						{
+							
+								comboPlayer.PlayAttack( 'AttackHeavy' );
+						}
 					}
 					else
-					{
-						if ( parent.slideTarget )
-						{
-							if ( !attackTarget || !parent.IsThreat(attackTarget) )
-								comboPlayer.PlayAttack( 'AttackHeavyNoTarget' );
-							else
-							{
-								
-									comboPlayer.PlayAttack( 'AttackHeavy' );
-							}
-						}
-						else
-							comboPlayer.PlayAttack( 'AttackHeavyNoTarget' );
-					}
-					// W3EE - End
+						comboPlayer.PlayAttack( 'AttackHeavyNoTarget' );
 				}			
 				else
 				{
-					// W3EE - Begin
-					if( W3EEComboDef.GetIsActive() )
+					if ( npc && npc.IsUsingHorse() )
+						comboPlayer.PlayAttack('AttackHeavyVsRider');
+					else if ( parent.slideTarget )
 					{
-						if( Combat().IsUsingBattleAxe() || Combat().IsUsingBattleMace() )
-							comboPlayer.PlayAttack('AttackBattleAxeHeavy');
+						 if(npc && ( npc.GetCurrentStance() == NS_Fly || npc.IsInAir() ) ) 
+							comboPlayer.PlayAttack( 'AttackHeavyFlying' );
+						
 						else
-							comboPlayer.PlayAttack('AttackHeavyReal');
+							comboPlayer.PlayAttack( 'AttackHeavy' );
 					}
 					else
 					{
-						if ( npc && npc.IsUsingHorse() )
-							comboPlayer.PlayAttack('AttackHeavyVsRider');
-						else if ( parent.slideTarget )
-						{
-							 if(npc && ( npc.GetCurrentStance() == NS_Fly || npc.IsInAir() ) ) 
-								comboPlayer.PlayAttack( 'AttackHeavyFlying' );
-							
-							else
-								comboPlayer.PlayAttack( 'AttackHeavy' );
-						}
-						else
-						{
-							
-								comboPlayer.PlayAttack( 'AttackHeavy' );
-						}
+						
+							comboPlayer.PlayAttack( 'AttackHeavy' );
 					}
-					// W3EE - End
 					
-					//witcher = (W3PlayerWitcher)parent;
+					witcher = (W3PlayerWitcher)parent;
 					if(witcher)
 					{
 						witcher.ToggleSpecialAttackHeavyAllowed(true);
@@ -2131,14 +1915,7 @@ state Combat in CR4Player extends ExtendedMovable
 				|| callbackInfo.inAspectName == 'AttackLightSlopeDown'
 				|| callbackInfo.inAspectName == 'AttackLightSlopeUp'
 				|| callbackInfo.inAspectName == 'AttackLightVsRider'
-				|| callbackInfo.inAspectName == 'AttackLightFar'
-				// W3EE - Begin
-				|| callbackInfo.inAspectName == 'AttackLightReal'
-				|| callbackInfo.inAspectName == 'AttackFistFast'
-				|| callbackInfo.inAspectName == 'AttackLightSecondary'
-				|| callbackInfo.inAspectName == 'AttackBattleAxeFast'
-			)
-			// W3EE - End
+				|| callbackInfo.inAspectName == 'AttackLightFar' )
 		{
 			isLightAttack = true;
 		}
@@ -2211,8 +1988,8 @@ state Combat in CR4Player extends ExtendedMovable
 			}
 			else
 			{
-				farAttackMinDist =  2.25f;
-				mediumAttackMinDist = 1.1f;
+				farAttackMinDist =  2.5f;
+				mediumAttackMinDist = 1.f;
 			}
 			
 			enableCloseCombatRadius = false;
@@ -2223,45 +2000,39 @@ state Combat in CR4Player extends ExtendedMovable
 			else
 				isHumanoid = false;
 			
-			// W3EE - Begin
-			if ( playerToTargetDist > parent.softLockDist )
-				callbackInfo.outDistance = ADIST_Small;
-			else if ( playerToTargetDist > 4.6f )
+			if ( parent.GetIsSprinting() )
 				callbackInfo.outDistance = ADIST_Large;
-			else if ( playerToTargetDist > farAttackMinDist )
+			else if ( playerToTargetDist > parent.softLockDist )
 				callbackInfo.outDistance = ADIST_Medium;
+			else if ( playerToTargetDist > farAttackMinDist )
+				callbackInfo.outDistance = ADIST_Large;
 			else if ( playerToTargetDist > mediumAttackMinDist )
-				callbackInfo.outDistance = ADIST_Small;
+				callbackInfo.outDistance = ADIST_Medium;
 			else
-				callbackInfo.outDistance = ADIST_Small;			
+				callbackInfo.outDistance = ADIST_Medium;			
 				
 			if ( parent.slideTarget && (CActor)parent.slideTarget )
 			{
 				if ( ( (CActor)( parent.slideTarget ) ).IsCurrentlyDodging() )
-					callbackInfo.outDistance = ADIST_Small;
+					callbackInfo.outDistance = ADIST_Medium;
 
 				if ( GetAttitudeBetween( parent, parent.slideTarget ) != AIA_Hostile )
-					callbackInfo.outDistance = ADIST_Small;
+					callbackInfo.outDistance = ADIST_Medium;
 			}
 			
 			if ( callbackInfo.inAspectName == 'AttackNeutral' )
 			{
 				if ( playerToTargetDist > 1.f || parent.HasAbility('NoCloseCombatCheat') )
-					callbackInfo.outDistance = ADIST_Small;
+					callbackInfo.outDistance = ADIST_Medium;
 				else
 					callbackInfo.outDistance = ADIST_Small;
 			}
 			
-			//Kolaris - Overexertion
-			if( parent.HasBuff(EET_Overexertion) && Options().StaminaDisablesModifiers() )
-				callbackInfo.outDistance = ADIST_Small;
 				
 			if ( callbackInfo.outDistance != ADIST_Small || callbackInfo.inAspectName == 'AttackHeavy' )
 				wasInCloseCombat = false;
 			else
 				wasInCloseCombat = true;
-			// W3EE - End
-			
 		}
 		else
 		{
@@ -2271,43 +2042,11 @@ state Combat in CR4Player extends ExtendedMovable
 			callbackInfo.outRotateToEnemyAngle = parent.GetCombatActionHeading();
 								
 			playerToTargetAngleDiff = AngleDistance( callbackInfo.outRotateToEnemyAngle , VecHeading( parent.GetHeadingVector() ) );
-			
-			//W3EE - Begin
-			// (Omnidirectional)
-			/*if( theInput.IsActionPressed('DistanceModifier') || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftY' ) >= Options().GetPadDistanceLong() ) || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftY' ) <= Options().GetPadDistanceLong() * -1.f ) || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftX' ) >= Options().GetPadDistanceLong() ) || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftX' ) <= Options().GetPadDistanceLong() * -1.f ) )
+
+			if ( parent.GetIsSprinting() )
 				callbackInfo.outDistance = ADIST_Large;
 			else
-			if( theInput.IsActionPressed('DistanceModifierMed') || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftY' ) >= Options().GetPadDistanceMedium() ) || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftY' ) <= Options().GetPadDistanceMedium() * -1.f ) || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftX' ) >= Options().GetPadDistanceMedium() ) || ( theInput.LastUsedGamepad() && theInput.GetActionValue( 'GI_AxisLeftX' ) <= Options().GetPadDistanceMedium() * -1.f ) )
 				callbackInfo.outDistance = ADIST_Medium;
-			else
-				callbackInfo.outDistance = ADIST_Small;*/
-				
-			// (Forward Only)
-			if( Options().LockOnMode() )
-			{
-				if( theInput.IsActionPressed('DistanceModifier') || (theInput.LastUsedGamepad() && AbsF(theInput.GetActionValue('GI_AxisLeftY')) >= Options().GetPadDistanceLong()) )
-					callbackInfo.outDistance = ADIST_Large;
-				else
-				if( theInput.IsActionPressed('DistanceModifierMed') || (theInput.LastUsedGamepad() && AbsF(theInput.GetActionValue('GI_AxisLeftY')) >= Options().GetPadDistanceMedium()) )
-					callbackInfo.outDistance = ADIST_Medium;
-				else
-					callbackInfo.outDistance = ADIST_Small;
-			}
-			else
-			{
-				if( theInput.IsActionPressed('DistanceModifier') || (theInput.LastUsedGamepad() && theInput.GetActionValue('GI_AxisLeftY') >= Options().GetPadDistanceLong()) )
-					callbackInfo.outDistance = ADIST_Large;
-				else
-				if( theInput.IsActionPressed('DistanceModifierMed') || (theInput.LastUsedGamepad() && theInput.GetActionValue('GI_AxisLeftY') >= Options().GetPadDistanceMedium()) )
-					callbackInfo.outDistance = ADIST_Medium;
-				else
-					callbackInfo.outDistance = ADIST_Small;
-			}
-				
-			//Kolaris - Overexertion
-			if( parent.HasBuff(EET_Overexertion) && Options().StaminaDisablesModifiers() )
-				callbackInfo.outDistance = ADIST_Small;
-			//W3EE - End
 		}
 		
 		if ( playerToTargetAngleDiff < -135.f )
@@ -2320,7 +2059,6 @@ state Combat in CR4Player extends ExtendedMovable
 			callbackInfo.outDirection = AD_Left;	
 		else
 			callbackInfo.outDirection = AD_Front;
-		
 		
 		if ( callbackInfo.inStringAttackCounter == 0 || callbackInfo.inGlobalAttackCounter == 0 )
 			parent.SetBIsFirstAttackInCombo(true);
@@ -2355,15 +2093,7 @@ state Combat in CR4Player extends ExtendedMovable
 		else
 			callbackInfo.outLeftString = true;
 		
-		// W3EE - Begin
-		if( callbackInfo.outDistance == ADIST_Large )
-			GetWitcherPlayer().SetAnimSpeed(0.9f);
-		
-		if( callbackInfo.outDirection != AD_Front && callbackInfo.outDistance != ADIST_Small )
-			W3EEComboDef.SetStanceSwitched(false);
-		
-		if ( callbackInfo.inAspectName == 'AttackHeavy' || callbackInfo.inAspectName == 'AttackHeavyReal' || callbackInfo.inAspectName == 'AttackLightSecondary' || callbackInfo.inAspectName == 'AttackBattleAxeFast' || callbackInfo.inAspectName == 'AttackBattleAxeHeavy' || W3EEComboDef.ShouldSwitchIdleAnim(callbackInfo.inAspectName == 'AttackLightReal' && callbackInfo.outDistance == ADIST_Small && callbackInfo.outDirection == AD_Front) )
-		// W3EE - End
+		if ( callbackInfo.inAspectName == 'AttackHeavy' )
 			parent.SetBehaviorVariable( 'playerAttackType', (int)PAT_Heavy );
 		else
 		{
@@ -2459,57 +2189,6 @@ state Combat in CR4Player extends ExtendedMovable
 		}
 	}
 	
-	private var assistHeading : float; default assistHeading = 0;
-	private function GetAssistHeading()
-	{
-		var targetHeading : float;
-		var facingAngleDist : float;
-		var camAngleDist : float;
-		var enemyDist : float;
-		var turnSpeed : float;
-		
-		targetHeading	= VecHeading(parent.GetTarget().GetWorldPosition() - parent.GetWorldPosition());
-		camAngleDist	= AngleDistance(VecHeading(theCamera.GetCameraDirection()) - parent.oTCameraOffset, targetHeading);
-		facingAngleDist	= AngleDistance(targetHeading, parent.GetHeading());
-		enemyDist		= VecDistance(parent.GetWorldPosition(), parent.GetTarget().GetWorldPosition() );
-		turnSpeed 		= 35.f * theGame.GetTimeScale();
-		
-		if( !enableSoftLock && !parent.IsHardLockEnabled() || theInput.GetActionValue('GI_AxisLeftX') != 0 || theInput.GetActionValue('GI_AxisLeftY') != 0)
-		{
-			if( Options().LockOnMode() )
-			{
-				// if( parent.aimAssist && (CActor)parent.slideTarget && enemyDist <= parent.aimAssistDist && facingAngleDist >= -parent.aimAssistAngleFacing && facingAngleDist <= parent.aimAssistAngleFacing )
-				// 	assistHeading = targetHeading;
-				// else
-				// if( !theInput.GetActionValue('GI_AxisLeftX') && !theInput.GetActionValue('GI_AxisLeftY') )
-				// 	assistHeading = parent.GetHeading();
-				// else
-				// {
-					if( parent.rawPlayerAngle < 180.f && parent.rawPlayerAngle > turnSpeed )
-						assistHeading = parent.GetHeading() + turnSpeed;
-					else
-					if( parent.rawPlayerAngle > turnSpeed )
-						assistHeading = parent.GetHeading() - turnSpeed;
-					else
-					if( parent.rawPlayerAngle > -180.f && parent.rawPlayerAngle < -turnSpeed )
-						assistHeading = parent.GetHeading() - turnSpeed;
-					else
-					if( parent.rawPlayerAngle < -turnSpeed )
-						assistHeading = parent.GetHeading() + turnSpeed;
-					else
-						assistHeading = parent.rawPlayerHeading;
-				// }
-			}
-			else
-			{
-				if( parent.aimAssist && (CActor)parent.slideTarget && enemyDist <= parent.aimAssistDist && camAngleDist >= -parent.aimAssistAngle && camAngleDist <= parent.aimAssistAngle )
-					assistHeading = targetHeading;
-				else
-					assistHeading = parent.GetCombatActionHeading();
-			}
-		}
-		else assistHeading = parent.GetCombatActionHeading();
-	}
 	
 	protected final function InteralCombatComboUpdate( timeDelta : float )
 	{
@@ -2521,16 +2200,13 @@ state Combat in CR4Player extends ExtendedMovable
 		var playerRadius : float;
 		
 		var heading : float;
-		
-		GetAssistHeading();
 
 		// modImprovedAttackBending - BEGIN
 		if (IAB_tryApplyingHeadingFromLeftStick(comboAttackA_Id, comboAttackA_Target, parent, comboPlayer, timeDelta)) {
 			return;
 		}
 		// modImprovedAttackBending - END
-
-
+		
 		if ( comboAttackA_Target )
 		{
 			
@@ -2574,11 +2250,11 @@ state Combat in CR4Player extends ExtendedMovable
 			}
 			
 			if ( !updatePosition && comboAttackA_Id != -1 )
-				comboPlayer.UpdateTarget( comboAttackA_Id, parent.GetWorldPosition() + VecFromHeading( assistHeading ), assistHeading, true, true );
+				comboPlayer.UpdateTarget( comboAttackA_Id, parent.GetWorldPosition() + VecFromHeading( parent.GetCombatActionHeading() ), parent.GetCombatActionHeading(), true, true );
 		}
 		else if ( comboAttackA_Id != -1 && parent.IsInCombatAction() && parent.GetBehaviorVariable( 'combatActionType' ) == 0.f )
 		{
-			comboPlayer.UpdateTarget( comboAttackA_Id, parent.GetWorldPosition() + VecFromHeading( assistHeading ), assistHeading, true, true );
+			comboPlayer.UpdateTarget( comboAttackA_Id, parent.GetWorldPosition() + VecFromHeading( parent.GetCombatActionHeading() ), parent.GetCombatActionHeading(), true, true );
 			
 		}
 			
