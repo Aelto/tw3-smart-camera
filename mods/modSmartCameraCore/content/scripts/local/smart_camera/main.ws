@@ -306,7 +306,7 @@ function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
   FindGameplayEntitiesInRange(
     entities,
     player,
-    20,
+    15,
     10,,
     FLAG_OnlyAliveActors | FLAG_ExcludePlayer | FLAG_Attitude_Hostile,
     player
