@@ -89,7 +89,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   if (player.smart_camera_data.desired_x_direction != 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing * 0.2,
       moveData.pivotRotationValue.Yaw,
       moveData.pivotRotationValue.Yaw
       + player.smart_camera_data.desired_x_direction
