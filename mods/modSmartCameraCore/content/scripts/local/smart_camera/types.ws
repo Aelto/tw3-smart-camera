@@ -40,8 +40,6 @@ struct SC_data {
 
   var corrected_y_direction: float;
 
-  var pitch_correction_delay: float;
-
   var horse_auto_center_enabled: bool;
 
   /**
@@ -57,6 +55,8 @@ struct SC_data {
   var yaw_correction_cursor: float;
 
   var interaction_focus_cursor: float;
+
+  var camera_disable_cursor: float;
 }
 
 struct SC_settings {

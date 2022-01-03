@@ -83,11 +83,14 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // Yaw correction //
   ///////////////////
   //#region yaw correction
-  if (!player.IsCurrentlyDodging()) {
-    // rotation.Yaw = LerpAngleF(0.2, rotation.Yaw, thePlayer.GetHeading());
-  }
+  SC_updateCursor(
+    delta,
+    player.smart_camera_data.camera_disable_cursor,
+    2,
+    player.GetIsSprinting()
+  );
 
-  if (player.smart_camera_data.desired_x_direction != 0) {
+  if (player.smart_camera_data.desired_x_direction != 0 && player.smart_camera_data.camera_disable_cursor < 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing * 0.2,
       moveData.pivotRotationValue.Yaw,
@@ -97,7 +100,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
-  else if (player.smart_camera_data.nearby_targets.Size()) {
+  else if (player.smart_camera_data.nearby_targets.Size() && player.smart_camera_data.camera_disable_cursor < 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta
         * player.smart_camera_data.settings.overall_speed
@@ -110,6 +113,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
   // that's for when you're in combat but there are no enemies targetting Geralt
+  // or if the camera is disabled because the player is sprinting for a few
+  // seconds
   else {
     rotation.Yaw = thePlayer.GetHeading();
 
@@ -198,6 +203,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   // offset coming from the creatures behind the Camera's back.
   back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions);
+  //#endregion zoom correction
 
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
