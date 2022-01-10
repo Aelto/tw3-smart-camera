@@ -32,7 +32,6 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   SC_updateCursor(
     delta,
     player.smart_camera_data.yaw_correction_cursor,
-    1,
     player_speed > 0
   );
 
@@ -86,7 +85,6 @@ function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4P
     SC_updateCursor(
       delta * 2,
       player.smart_camera_data.interaction_focus_cursor,
-      1,
       false
     );
 
@@ -96,7 +94,6 @@ function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4P
   SC_updateCursor(
     delta,
     player.smart_camera_data.interaction_focus_cursor,
-    1,
     true
   );
 

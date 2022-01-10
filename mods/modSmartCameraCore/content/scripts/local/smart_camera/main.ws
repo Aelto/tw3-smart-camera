@@ -24,6 +24,10 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     return false;
   }
 
+  if (thePlayer.IsCameraLockedToTarget() || !theInput.LastUsedGamepad()) {
+    return false;
+  }
+
   camera = theGame.GetGameCamera();
   camera.ChangePivotDistanceController( 'Default' );
   camera.ChangePivotRotationController( 'Exploration' );
@@ -66,7 +70,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   target_position = target.GetWorldPosition();
 
   mean_position = SC_getMeanPosition(positions, player);
-  is_mean_position_too_high = mean_position.Z - player_position.Z > 1.5;
+  is_mean_position_too_high = mean_position.Z - player_position.Z > 3.5;
 
   rotation = SC_getRotationToLookAtPosition(
     mean_position,
@@ -77,54 +81,50 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     * delta
     * player.smart_camera_data.settings.horizontal_sensitivity;
 
-  player.smart_camera_data.desired_x_direction *= 1 - (1 - 0.99 * delta);
+  player.smart_camera_data.desired_x_direction = LerpF(delta * 0.3, player.smart_camera_data.desired_x_direction, 0);
 
   ////////////////////
   // Yaw correction //
   ///////////////////
   //#region yaw correction
-  SC_updateCursor(
-    delta,
+  player.smart_camera_data.camera_disable_cursor = SC_updateCursor(
+    delta * 0.5,
     player.smart_camera_data.camera_disable_cursor,
-    2,
     player.GetIsSprinting()
   );
 
-  if (player.smart_camera_data.desired_x_direction != 0 && player.smart_camera_data.camera_disable_cursor < 0) {
-    moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing * 0.2,
-      moveData.pivotRotationValue.Yaw,
-      moveData.pivotRotationValue.Yaw
-      + player.smart_camera_data.desired_x_direction
-    );
 
-    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+  if (AbsF(player.smart_camera_data.desired_x_direction) > 0.25) {
+    player.smart_camera_data.camera_disable_cursor = 1;
   }
-  else if (player.smart_camera_data.nearby_targets.Size() && player.smart_camera_data.camera_disable_cursor < 0) {
-    moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta
-        * player.smart_camera_data.settings.overall_speed
-        * player.smart_camera_data.combat_start_smoothing
-        * 2,
-      moveData.pivotRotationValue.Yaw,
-      rotation.Yaw
-    );
 
-    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
-  }
-  // that's for when you're in combat but there are no enemies targetting Geralt
-  // or if the camera is disabled because the player is sprinting for a few
-  // seconds
-  else {
-    rotation.Yaw = thePlayer.GetHeading();
+  if (player.smart_camera_data.camera_disable_cursor < 0) {
+    if (player.smart_camera_data.nearby_targets.Size()) {
+      moveData.pivotRotationValue.Yaw = LerpAngleF(
+        delta
+          * player.smart_camera_data.settings.overall_speed
+          * player.smart_camera_data.combat_start_smoothing
+          * 2,
+        moveData.pivotRotationValue.Yaw,
+        rotation.Yaw
+      );
 
-    moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
-      moveData.pivotRotationValue.Yaw,
-      rotation.Yaw
-    );
+      moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+    }
+    // that's for when you're in combat but there are no enemies targetting Geralt
+    // or if the camera is disabled because the player is sprinting for a few
+    // seconds
+    else {
+      rotation.Yaw = thePlayer.GetHeading();
 
-    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+      moveData.pivotRotationValue.Yaw = LerpAngleF(
+        delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+        moveData.pivotRotationValue.Yaw,
+        rotation.Yaw
+      );
+
+      moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+    }
   }
   //#endregion yaw correction
 
@@ -282,7 +282,7 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
   return ClampF(
     VecDistance2D(mean_position, player_position) * -1,
     0,
-    (10 - MinF(player.smart_camera_data.settings.camera_zoom, 5)) * -0.5,
+    (10 - MinF(player.smart_camera_data.settings.camera_zoom, 5)) * -0.75,
   );
 }
 
