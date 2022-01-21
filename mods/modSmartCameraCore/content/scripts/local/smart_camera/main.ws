@@ -24,8 +24,19 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     return false;
   }
 
-  if (thePlayer.IsCameraLockedToTarget() || !theInput.LastUsedGamepad()) {
+  if (thePlayer.IsCameraLockedToTarget()) {
     return false;
+  }
+
+  if (!theInput.LastUsedGamepad()) {
+    if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
+      return false;
+    }
+
+    if (theInput.GetActionValue('GI_MouseDampX') != 0
+     || theInput.GetActionValue('GI_MouseDampY') != 0) {
+      player.smart_camera_data.camera_disable_cursor = 1;
+    }
   }
 
   camera = theGame.GetGameCamera();

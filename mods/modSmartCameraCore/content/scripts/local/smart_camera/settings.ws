@@ -3,6 +3,7 @@ function SC_reloadSettings(out settings: SC_settings) {
   settings.is_enabled_in_combat = SC_isEnabledInCombat();
   settings.is_enabled_in_exploration = SC_isEnabledInExploration();
   settings.is_enabled_on_horse = SC_isEnabledOnHorse();
+  settings.is_enabled_with_mouse = SC_isEnabledWithMouse();
   settings.camera_zoom = SC_getCameraZoom();
   settings.horizontal_sensitivity = SC_getHorizontalSensitivity();
   settings.overall_speed = SC_getOverallSpeed();
@@ -27,6 +28,12 @@ function SC_isEnabledOnHorse(): bool {
   return theGame
     .GetInGameConfigWrapper()
     .GetVarValue('SCgeneral', 'SCmodEnabledOnHorse');
+}
+
+function SC_isEnabledWithMouse(): bool {
+  return theGame
+    .GetInGameConfigWrapper()
+    .GetVarValue('SCgeneral', 'SCmodEnabledWithMouse');
 }
 
 function SC_getCameraZoom(): float {
