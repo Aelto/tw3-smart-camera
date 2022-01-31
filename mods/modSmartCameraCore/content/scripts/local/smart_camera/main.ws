@@ -24,7 +24,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     return false;
   }
 
-  if (thePlayer.IsCameraLockedToTarget()) {
+  if (thePlayer.IsCameraLockedToTarget() || thePlayer.IsCurrentSignChanneled() && thePlayer.GetCurrentlyCastSign() == ST_Igni) {
     return false;
   }
 
