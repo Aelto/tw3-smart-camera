@@ -2,11 +2,35 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   var rotation: EulerAngles;
   var angle_distance: float;
   var horse_speed: float;
+  var horse_zoom_offset: float;
   var absolute_angle_distance: float;
 
   if (!player.smart_camera_data.settings.is_enabled_on_horse) {
     return false;
   }
+
+  player.smart_camera_data.time_before_settings_fetch -= delta;
+  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
+    player.smart_camera_data.time_before_settings_fetch = 10;
+    SC_reloadSettings(player.smart_camera_data.settings);
+  }
+
+  if (!theInput.LastUsedGamepad()) {
+    if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
+      return false;
+    }
+
+    if (theInput.GetActionValue('GI_MouseDampX') != 0
+     || theInput.GetActionValue('GI_MouseDampY') != 0) {
+      player.smart_camera_data.camera_disable_cursor = 1;
+    }
+  }
+
+  player.smart_camera_data.camera_disable_cursor = SC_updateCursor(
+    delta * 0.5,
+    player.smart_camera_data.camera_disable_cursor,
+    player.IsInCombat()
+  );
 
   rotation = moveData.pivotRotationValue;
   horse_speed = horse.InternalGetSpeed();
@@ -27,7 +51,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   // Yaw correction //
   ///////////////////
   //#region yaw correction
-  if (horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
+  if (player.smart_camera_data.camera_disable_cursor < 0 && horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed * horse_speed * 0.5 * absolute_angle_distance * 0.03,
       moveData.pivotRotationValue.Yaw,
@@ -65,6 +89,19 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   // Zoom correction //
   /////////////////////
   //#region zoom correction
+
+  // an offset users can set from the menus, the default value is 5, below
+  // 5 and the camera gets closer, higher than 5 and its goes further away
+  if (player.smart_camera_data.settings.horse_camera_zoom == 5) {
+    horse_zoom_offset = 1;
+  }
+  else if (player.smart_camera_data.settings.horse_camera_zoom < 5) {
+    horse_zoom_offset = 1 / ((5 - player.smart_camera_data.settings.horse_camera_zoom) * 10);
+  }
+  else {
+    horse_zoom_offset = player.smart_camera_data.settings.horse_camera_zoom;
+  }
+
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
     moveData.cameraLocalSpaceOffsetVel,
@@ -72,7 +109,12 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
       // x axis: horizontal position, left to right
       0,
       // y axis: horizontal position, front to back
-      -2 + absolute_angle_distance * horse_speed * 0.02 * (float)player.smart_camera_data.horse_auto_center_enabled,
+        (-2 * horse_zoom_offset)
+          + MinF(absolute_angle_distance, 90)
+          * horse_speed
+          * 0.02
+          * (float)player.smart_camera_data.horse_auto_center_enabled
+          * horse_zoom_offset,
       // z axis: vertical position, bottom to top
       0
     ),

@@ -85,4 +85,6 @@ struct SC_settings {
   var camera_height: float;
 
   var camera_horizontal_position: float;
+
+  var horse_camera_zoom: float;
 }

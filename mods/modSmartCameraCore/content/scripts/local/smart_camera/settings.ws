@@ -10,6 +10,7 @@ function SC_reloadSettings(out settings: SC_settings) {
   settings.camera_fov = SC_getCameraFov();
   settings.camera_height = SC_getCameraHeight();
   settings.camera_horizontal_position = SC_getCameraHorizontalPosition();
+  settings.horse_camera_zoom = SC_getHorseCameraZoom();
 }
 
 function SC_isEnabledInCombat(): bool {
@@ -81,5 +82,13 @@ function SC_getCameraHorizontalPosition(): float {
     theGame
     .GetInGameConfigWrapper()
     .GetVarValue('SCgeneral', 'SC_getCameraHorizontalPosition')
+  );
+}
+
+function SC_getHorseCameraZoom(): float {
+  return StringToFloat(
+    theGame
+    .GetInGameConfigWrapper()
+    .GetVarValue('SCgeneral', 'SChorseCameraZoom')
   );
 }
