@@ -4,6 +4,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   var horse_speed: float;
   var horse_zoom_offset: float;
   var absolute_angle_distance: float;
+  var pelvis_torso_angle: EulerAngles;
 
   if (!player.smart_camera_data.settings.is_enabled_on_horse) {
     return false;
@@ -13,6 +14,9 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   if (player.smart_camera_data.time_before_settings_fetch <= 0) {
     player.smart_camera_data.time_before_settings_fetch = 10;
     SC_reloadSettings(player.smart_camera_data.settings);
+
+    player.smart_camera_data.horse_bone_index_torso = horse.GetEntity().GetBoneIndex('head');
+    player.smart_camera_data.horse_bone_index_pelvis = horse.GetEntity().GetBoneIndex('pelvis');
   }
 
   if (!theInput.LastUsedGamepad()) {
@@ -46,6 +50,24 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   if (theInput.GetActionValue('GI_AxisRightX') != 0) {
     player.smart_camera_data.horse_auto_center_enabled = false;
   }
+
+  //////////////////////
+  // Pitch correction //
+  //////////////////////
+  //#region pitch correction
+  if (player.smart_camera_data.camera_disable_cursor < 0 && horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
+    pelvis_torso_angle = VecToRotation(
+      horse.GetEntity().GetBoneWorldPositionByIndex(player.smart_camera_data.horse_bone_index_pelvis)
+      - horse.GetEntity().GetBoneWorldPositionByIndex(player.smart_camera_data.horse_bone_index_torso)
+    );
+
+    moveData.pivotRotationValue.Pitch = LerpAngleF(
+      delta * player.smart_camera_data.settings.overall_speed / (horse_speed + 0.01),
+      moveData.pivotRotationValue.Pitch,
+      pelvis_torso_angle.Pitch - 15
+    );
+  }
+  //#endregion pitch correction
 
   ////////////////////
   // Yaw correction //

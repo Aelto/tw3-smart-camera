@@ -57,6 +57,9 @@ struct SC_data {
   var interaction_focus_cursor: float;
 
   var camera_disable_cursor: float;
+
+  var horse_bone_index_torso: int;
+  var horse_bone_index_pelvis: int;
 }
 
 struct SC_settings {
