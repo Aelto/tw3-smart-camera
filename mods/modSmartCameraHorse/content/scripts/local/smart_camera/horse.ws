@@ -138,7 +138,10 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
           * horse_speed
           * 0.02
           * (float)player.smart_camera_data.horse_auto_center_enabled
-          * horse_zoom_offset,
+          * horse_zoom_offset
+          // this one is to compensate for the default value of `horse_zoom_offset`
+          // of 5.
+          * 0.2,
       // z axis: vertical position, bottom to top
       0
     ),
