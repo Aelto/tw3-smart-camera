@@ -121,7 +121,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     horse_zoom_offset = 1 / ((5 - player.smart_camera_data.settings.horse_camera_zoom) * 10);
   }
   else {
-    horse_zoom_offset = player.smart_camera_data.settings.horse_camera_zoom;
+    horse_zoom_offset = player.smart_camera_data.settings.horse_camera_zoom - 5;
   }
 
   DampVectorSpring(
