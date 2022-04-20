@@ -121,7 +121,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     horse_zoom_offset = 1 / ((5 - player.smart_camera_data.settings.horse_camera_zoom) * 10);
   }
   else {
-    horse_zoom_offset = player.smart_camera_data.settings.horse_camera_zoom;
+    horse_zoom_offset = player.smart_camera_data.settings.horse_camera_zoom - 5;
   }
 
   DampVectorSpring(
@@ -129,14 +129,19 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     moveData.cameraLocalSpaceOffsetVel,
     Vector(
       // x axis: horizontal position, left to right
-      0,
+      // we place the camera based on the horse's head position.
+      pelvis_torso_angle.Yaw * 0.1,
+
       // y axis: horizontal position, front to back
         (-2 * horse_zoom_offset)
           + MinF(absolute_angle_distance, 90)
           * horse_speed
           * 0.02
           * (float)player.smart_camera_data.horse_auto_center_enabled
-          * horse_zoom_offset,
+          * horse_zoom_offset
+          // this one is to compensate for the default value of `horse_zoom_offset`
+          // of 5.
+          * 0.2,
       // z axis: vertical position, bottom to top
       0
     ),
