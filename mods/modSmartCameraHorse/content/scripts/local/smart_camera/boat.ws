@@ -4,7 +4,7 @@ function SC_boatOnCameraTickPostTick(player: CR4Player, boat: CBoatComponent, ca
   var boat_speed: float;
   var absolute_angle_distance: float;
 
-  if (!player.smart_camera_data.settings.is_enabled_on_horse) {
+  if (!player.smart_camera_data.settings.is_enabled_on_boat) {
     return false;
   }
 
