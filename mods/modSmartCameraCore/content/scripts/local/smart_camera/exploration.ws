@@ -22,7 +22,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   player_speed = player.GetMovingAgentComponent().GetSpeed();
 
   rotation = SC_getUpdatedRotationToLookAtTarget(rotation, player, delta, player_speed);
-    player.smart_camera_data.exploration_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.exploration_start_smoothing, 1);
+  player.smart_camera_data.exploration_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.exploration_start_smoothing, 1);
   player.smart_camera_data.combat_start_smoothing = 0;
 
   ////////////////////
@@ -49,6 +49,25 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
   //#endregion yaw correction
+
+  ////////////////////
+  // Roll correction //
+  ///////////////////
+  //#region roll correction
+  // when the player turns around, moves the camera if the player heading is
+  // different than the camera heading. But only after a 90 degrees difference.
+  // Acts the same way as the Elden Ring camera.
+  if (player_speed > 0 && player.smart_camera_data.settings.exploration_autocenter_enabled) {
+    
+    moveData.pivotRotationValue.Yaw = LerpAngleF(
+      delta * MaxF(AbsF(angle_distance) / 90 - 0.3, 0) * player_speed * 0.25 + 0.05 * delta * player_speed,
+      moveData.pivotRotationValue.Yaw,
+      player.GetHeading()
+    );
+
+    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+  }
+  //#endregion roll correction
 
   return false;
 }

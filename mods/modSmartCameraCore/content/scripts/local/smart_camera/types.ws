@@ -91,4 +91,6 @@ struct SC_settings {
   var camera_horizontal_position: float;
 
   var horse_camera_zoom: float;
+
+  var exploration_autocenter_enabled: bool;
 }

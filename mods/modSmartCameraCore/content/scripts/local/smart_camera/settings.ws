@@ -12,6 +12,7 @@ function SC_reloadSettings(out settings: SC_settings) {
   settings.camera_height = SC_getCameraHeight();
   settings.camera_horizontal_position = SC_getCameraHorizontalPosition();
   settings.horse_camera_zoom = SC_getHorseCameraZoom();
+  settings.exploration_autocenter_enabled = SC_isExplorationAutocenterEnabled();
 }
 
 function SC_isEnabledInCombat(): bool {
@@ -98,4 +99,10 @@ function SC_getHorseCameraZoom(): float {
     .GetInGameConfigWrapper()
     .GetVarValue('SCgeneral', 'SChorseCameraZoom')
   );
+}
+
+function SC_isExplorationAutocenterEnabled(): bool {
+  return theGame
+    .GetInGameConfigWrapper()
+    .GetVarValue('SCgeneral', 'SCexplorationAutoCenterEnabled');
 }
