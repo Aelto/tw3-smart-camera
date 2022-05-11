@@ -97,13 +97,6 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
 
     // moveData.pivotRotationController.SetDesiredHeading(angle_distance * 0.1);
   }
-  else {
-    moveData.pivotRotationValue.Roll = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * absolute_angle_distance * 0.01,
-      moveData.pivotRotationValue.Roll,
-      0
-    );
-  }
   //#endregion roll correction
 
 
