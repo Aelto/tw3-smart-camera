@@ -52,16 +52,23 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   //#endregion yaw correction
 
   ////////////////////
-  // Roll correction //
+  // Yaw correction //
   ///////////////////
-  //#region roll correction
+  //#region Yaw correction
   // when the player turns around, moves the camera if the player heading is
   // different than the camera heading. But only after a 90 degrees difference.
   // Acts the same way as the Elden Ring camera.
   if (player_speed > 0 && player.smart_camera_data.settings.exploration_autocenter_enabled) {
     
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * MaxF(AbsF(angle_distance) / 90 - 0.3, 0) * player_speed * 0.25 + 0.05 * delta * player_speed,
+      delta
+        * MaxF(AbsF(angle_distance) / 90 - 0.3, 0)
+        * player_speed
+        * 0.25
+        // we divide by the right axis values so that using the right stick
+        // reduces the auto-center speed
+        / (1 + AbsF(theInput.GetActionValue('GI_AxisRightX')) + AbsF(theInput.GetActionValue('GI_AxisRightY')))
+        + 0.05 * delta * player_speed,
       moveData.pivotRotationValue.Yaw,
       player.GetHeading()
     );
