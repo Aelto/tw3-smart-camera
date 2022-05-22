@@ -41,7 +41,8 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
         * player.smart_camera_data.settings.overall_speed
         * player.smart_camera_data.exploration_start_smoothing
         * player.smart_camera_data.yaw_correction_cursor
-        * 1.5,
+        * 1.5
+        / MaxF(player_speed, 1.0),
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
     );
