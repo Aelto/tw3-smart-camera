@@ -10,7 +10,7 @@ manage it yourself. Mainly aimed at gamepads.
 The mod is modular, you can choose to install the core version (the fight camera) without the horse camera. However it is not possible to do the opposite as the horse camera depends on the combat camera.
 
  - Download ["SmartCamera Core" and/or "SmartCamera Horse"](https://github.com/Aelto/tw3-smart-camera/releases)
- - Drop the `mods`, `dlc` and `bin` folders of the release inside you Witcher 3 directory in order to merge them with your current mods/dlc/bin folders.
- - Merge the scripts with your script-merger of your choice
+ - Drop the release's `mods`, `dlc` and `bin` folders inside your Witcher 3 directory in order to merge them with your current mods/dlc/bin folders.
+ - Merge the scripts with the script-merger of your choice
  - Launch the game, open the mod menu and apply the default preset
  - Load a save and confirm everything is working as intended
