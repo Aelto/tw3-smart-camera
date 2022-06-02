@@ -60,6 +60,7 @@ struct SC_data {
 
   var horse_bone_index_torso: int;
   var horse_bone_index_pelvis: int;
+  default horse_bone_index_pelvis = -999;
 }
 
 struct SC_settings {

@@ -11,7 +11,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   }
 
   player.smart_camera_data.time_before_settings_fetch -= delta;
-  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
+  if (player.smart_camera_data.time_before_settings_fetch <= 0 || playher.smart_camera_data.horse_bone_index_pelvis == -999) {
     player.smart_camera_data.time_before_settings_fetch = 10;
     SC_reloadSettings(player.smart_camera_data.settings);
 
