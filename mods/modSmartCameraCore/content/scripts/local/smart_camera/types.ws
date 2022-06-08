@@ -24,7 +24,7 @@ struct SC_data {
   /**
    * The cached settings data
    */
-  var settings: SC_settings;
+  var settings: SC_Settings;
 
   /**
    * a percentage going from 0 to 1 representing how much the movements of the
@@ -63,35 +63,35 @@ struct SC_data {
   default horse_bone_index_pelvis = -999;
 }
 
-struct SC_settings {
-  /**
-   * Whether or not the mod is enabled
-   */
-  var is_enabled_in_combat: bool;
-  var is_enabled_in_exploration: bool;
-  var is_enabled_on_horse: bool;
-  var is_enabled_on_boat: bool;
-  var is_enabled_with_mouse: bool;
+// struct SC_settings {
+//   /**
+//    * Whether or not the mod is enabled
+//    */
+//   var is_enabled_in_combat: bool;
+//   var is_enabled_in_exploration: bool;
+//   var is_enabled_on_horse: bool;
+//   var is_enabled_on_boat: bool;
+//   var is_enabled_with_mouse: bool;
 
-  var camera_zoom: float;
+//   var camera_zoom: float;
 
-  /**
-   * Multiplier control the horizontal sensitivity
-   */
-  var horizontal_sensitivity: float;
+//   /**
+//    * Multiplier control the horizontal sensitivity
+//    */
+//   var horizontal_sensitivity: float;
 
-  /**
-   * The overall speed of the camera
-   */
-  var overall_speed: float;
+//   /**
+//    * The overall speed of the camera
+//    */
+//   var overall_speed: float;
 
-  var camera_fov: float;
+//   var camera_fov: float;
 
-  var camera_height: float;
+//   var camera_height: float;
 
-  var camera_horizontal_position: float;
+//   var camera_horizontal_position: float;
 
-  var horse_camera_zoom: float;
+//   var horse_camera_zoom: float;
 
-  var exploration_autocenter_enabled: bool;
-}
+//   var exploration_autocenter_enabled: bool;
+// }

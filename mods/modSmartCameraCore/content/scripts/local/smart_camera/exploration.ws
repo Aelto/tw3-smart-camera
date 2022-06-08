@@ -6,7 +6,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   var player_speed: float;
   var angle_distance: float;
 
-  if (!player.smart_camera_data.settings.is_enabled_in_exploration) {
+  if (!player.smart_camera_data.settings.general.modEnabledInExploration) {
     return false;
   }
 
@@ -38,7 +38,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   if (player.smart_camera_data.yaw_correction_cursor > 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta
-        * player.smart_camera_data.settings.overall_speed
+        * player.smart_camera_data.settings.general.overallSpeed
         * player.smart_camera_data.exploration_start_smoothing
         * player.smart_camera_data.yaw_correction_cursor
         * 1.5
@@ -58,7 +58,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   // when the player turns around, moves the camera if the player heading is
   // different than the camera heading. But only after a 90 degrees difference.
   // Acts the same way as the Elden Ring camera.
-  if (player_speed > 0 && player.smart_camera_data.settings.exploration_autocenter_enabled) {
+  if (player_speed > 0 && player.smart_camera_data.settings.general.explorationAutoCenterEnabled) {
     
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta
@@ -147,5 +147,5 @@ function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4P
 }
 
 function SC_shouldDisableExplorationPosTick(player: CR4Player): bool {
-  return player.smart_camera_data.settings.is_enabled_in_combat && !player.IsCameraLockedToTarget()
+  return player.smart_camera_data.settings.general.modEnabledInCombat && !player.IsCameraLockedToTarget();
 }
