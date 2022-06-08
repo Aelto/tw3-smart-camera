@@ -4,7 +4,7 @@ function SC_boatOnCameraTickPostTick(player: CR4Player, boat: CBoatComponent, ca
   var boat_speed: float;
   var absolute_angle_distance: float;
 
-  if (!player.smart_camera_data.settings.general.modEnabledOnBoat) {
+  if (!player.smart_camera_data.settings.is_enabled_on_boat) {
     return false;
   }
 
@@ -29,7 +29,7 @@ function SC_boatOnCameraTickPostTick(player: CR4Player, boat: CBoatComponent, ca
   //#region yaw correction
   if (boat_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.settings.general.overallSpeed * boat_speed * 1 * absolute_angle_distance * 0.03,
+      delta * player.smart_camera_data.settings.overall_speed * boat_speed * 1 * absolute_angle_distance * 0.03,
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
     );
@@ -44,7 +44,7 @@ function SC_boatOnCameraTickPostTick(player: CR4Player, boat: CBoatComponent, ca
   //#region roll correction
   if (boat_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
     moveData.pivotRotationValue.Roll = LerpAngleF(
-      delta * player.smart_camera_data.settings.general.overallSpeed,
+      delta * player.smart_camera_data.settings.overall_speed,
       moveData.pivotRotationValue.Roll,
       angle_distance * 0.3 * boat_speed
     );
@@ -53,7 +53,7 @@ function SC_boatOnCameraTickPostTick(player: CR4Player, boat: CBoatComponent, ca
   }
   else {
     moveData.pivotRotationValue.Roll = LerpAngleF(
-      delta * player.smart_camera_data.settings.general.overallSpeed * absolute_angle_distance * 0.01,
+      delta * player.smart_camera_data.settings.overall_speed * absolute_angle_distance * 0.01,
       moveData.pivotRotationValue.Roll,
       0
     );
@@ -74,7 +74,7 @@ function SC_boatOnCameraTickPostTick(player: CR4Player, boat: CBoatComponent, ca
       // y axis: horizontal position, front to back
       0 + absolute_angle_distance * boat_speed * 0.02 * (float)player.smart_camera_data.horse_auto_center_enabled,
       // z axis: vertical position, bottom to top
-      player.smart_camera_data.settings.general.cameraHeight + 1
+      player.smart_camera_data.settings.camera_height + 1
     ),
     0.5f,
     delta

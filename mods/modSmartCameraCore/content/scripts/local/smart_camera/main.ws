@@ -11,14 +11,16 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var camera: CCustomCamera;
   var back_offset: float;
   var target: CActor;
-  
-  if (!player.smart_camera_data.settings) {
-    player.smart_camera_data.settings = new SC_Settings in player;
 
-    GetSettingsMasterRegistry().AddSettings(player.smart_camera_data.settings, 'SC_Settings');
+  player.smart_camera_data.time_before_settings_fetch -= delta;
+  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
+    player.smart_camera_data.time_before_settings_fetch = 10;
+    SC_reloadSettings(player.smart_camera_data.settings);
   }
 
-  if (!player.smart_camera_data.settings.general.modEnabledInCombat && !player.smart_camera_data.settings.general.modEnabledInExploration) {
+  if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
+    player.smart_camera_data.time_before_target_fetch = -1;
+
     return false;
   }
 
@@ -27,7 +29,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
 
   if (!theInput.LastUsedGamepad()) {
-    if (!player.smart_camera_data.settings.general.modEnabledWithMouse) {
+    if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
       return false;
     }
 
@@ -40,7 +42,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   camera = theGame.GetGameCamera();
   camera.ChangePivotDistanceController( 'Default' );
   camera.ChangePivotRotationController( 'Exploration' );
-  camera.fov = thePlayer.smart_camera_data.settings.general.cameraFov;
+  camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
   moveData.pivotRotationController = camera.GetActivePivotRotationController();
   moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
   moveData.pivotPositionController = camera.GetActivePivotPositionController();
@@ -54,7 +56,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     return SC_onGameCameraTick_outOfCombat(player, moveData, delta);
   }
 
-  if (!player.smart_camera_data.settings.general.modEnabledInCombat) {
+  if (!player.smart_camera_data.settings.is_enabled_in_combat) {
     return false;
   }
 
@@ -88,7 +90,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
     * delta
-    * player.smart_camera_data.settings.general.horizontalSensitivity;
+    * player.smart_camera_data.settings.horizontal_sensitivity;
 
   player.smart_camera_data.desired_x_direction = LerpF(delta * 0.3, player.smart_camera_data.desired_x_direction, 0);
 
@@ -111,7 +113,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     if (player.smart_camera_data.nearby_targets.Size()) {
       moveData.pivotRotationValue.Yaw = LerpAngleF(
         delta
-          * player.smart_camera_data.settings.general.overallSpeed
+          * player.smart_camera_data.settings.overall_speed
           * player.smart_camera_data.combat_start_smoothing
           * 2,
         moveData.pivotRotationValue.Yaw,
@@ -127,7 +129,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       rotation.Yaw = thePlayer.GetHeading();
 
       moveData.pivotRotationValue.Yaw = LerpAngleF(
-        delta * player.smart_camera_data.settings.general.overallSpeed * player.smart_camera_data.combat_start_smoothing,
+        delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
         moveData.pivotRotationValue.Yaw,
         rotation.Yaw
       );
@@ -158,7 +160,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
     moveData.pivotRotationController.SetDesiredPitch( rotation.Pitch );
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
-      delta * player.smart_camera_data.settings.general.overallSpeed * player.smart_camera_data.combat_start_smoothing,
+      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
       moveData.pivotRotationValue.Pitch,
       -rotation.Pitch
     );
@@ -183,7 +185,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
       moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.corrected_y_direction );
       moveData.pivotRotationValue.Pitch	= LerpAngleF(
-        delta * player.smart_camera_data.settings.general.overallSpeed * player.smart_camera_data.combat_start_smoothing,
+        delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
         moveData.pivotRotationValue.Pitch,
         player.smart_camera_data.corrected_y_direction
       );
@@ -191,11 +193,11 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   }
   else if (player.smart_camera_data.update_y_direction_duration > 0) {
-    player.smart_camera_data.update_y_direction_duration -= delta * player.smart_camera_data.settings.general.overallSpeed;
+    player.smart_camera_data.update_y_direction_duration -= delta * player.smart_camera_data.settings.overall_speed;
 
     moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.desired_y_direction );
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
-      delta * player.smart_camera_data.settings.general.overallSpeed,
+      delta * player.smart_camera_data.settings.overall_speed,
       moveData.pivotRotationValue.Pitch,
       player.smart_camera_data.desired_y_direction
     );
@@ -219,14 +221,14 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.cameraLocalSpaceOffsetVel,
     Vector(
       // x axis: horizontal position, left to right
-      player.smart_camera_data.settings.general.cameraHorizontalPosition,
+      player.smart_camera_data.settings.camera_horizontal_position,
       // y axis: horizontal position, front to back
-      4 - player.smart_camera_data.settings.general.cameraZoom + back_offset + ((int)is_mean_position_too_high * -1),
+      4 - player.smart_camera_data.settings.camera_zoom + back_offset + ((int)is_mean_position_too_high * -1),
       // z axis: vertical position, bottom to top
-      player.smart_camera_data.settings.general.cameraHeight + ((int)is_mean_position_too_high * 0.2)
+      player.smart_camera_data.settings.camera_height + ((int)is_mean_position_too_high * 0.2)
     ),
     0.5f,
-    delta * player.smart_camera_data.settings.general.overallSpeed * 0.2 * player.smart_camera_data.combat_start_smoothing
+    delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing
   );
 
   return true;
@@ -291,7 +293,7 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
   return ClampF(
     VecDistance2D(mean_position, player_position) * -1,
     0,
-    (10 - MinF(player.smart_camera_data.settings.general.cameraZoom, 5)) * -0.75,
+    (10 - MinF(player.smart_camera_data.settings.camera_zoom, 5)) * -0.75,
   );
 }
 
