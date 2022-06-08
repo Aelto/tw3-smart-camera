@@ -358,7 +358,9 @@ state Combat in CR4Player extends ExtendedMovable
 		var playerToTargetVector	: Vector;
 		
 		// smartcamera - BEGIN
-		return true;
+		if (SC_shouldDisableExplorationPosTick(parent)) {
+			return true;
+		}
 		// smartcamera - END
 		
 		if( parent.movementLockType == PMLT_NoRun && !GetWitcherPlayer().HasBuff( EET_Mutation11Immortal ) )
