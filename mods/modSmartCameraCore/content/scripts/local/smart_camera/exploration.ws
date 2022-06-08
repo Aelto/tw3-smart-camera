@@ -147,5 +147,5 @@ function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4P
 }
 
 function SC_shouldDisableExplorationPosTick(player: CR4Player): bool {
-  return player.smart_camera_data.settings.is_enabled_in_combat && !player.IsCameraLockedToTarget()
+  return player.smart_camera_data.settings.is_enabled_in_combat && !player.IsCameraLockedToTarget();
 }
