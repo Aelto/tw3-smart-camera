@@ -11,7 +11,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   }
 
   player.smart_camera_data.time_before_settings_fetch -= delta;
-  if (player.smart_camera_data.time_before_settings_fetch <= 0 || player.smart_camera_data.horse_bone_index_pelvis == -999) {
+  if (player.smart_camera_data.time_before_settings_fetch <= 0 || player.smart_camera_data.horse_bone_index_pelvis < -999) {
     player.smart_camera_data.time_before_settings_fetch = 10;
     SC_reloadSettings(player.smart_camera_data.settings);
 
@@ -55,7 +55,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   // Pitch correction //
   //////////////////////
   //#region pitch correction
-  if (player.smart_camera_data.camera_disable_cursor < 0 && horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
+  if (player.smart_camera_data.camera_disable_cursor < 0 && horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled && player.smart_camera_data.horse_bone_index_pelvis > 0) {
     pelvis_torso_angle = VecToRotation(
       horse.GetEntity().GetBoneWorldPositionByIndex(player.smart_camera_data.horse_bone_index_pelvis)
       - horse.GetEntity().GetBoneWorldPositionByIndex(player.smart_camera_data.horse_bone_index_torso)
