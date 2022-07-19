@@ -63,6 +63,11 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta
         * MaxF(AbsF(angle_distance) / 90 - 0.3, 0)
+        // a number that reaches zero once the angle distance reaches 120, this
+        // disables the autocenter the closer Geralt goes towards the camera.
+        // For example when you do a 180 degrees turn the camera should not auto
+        // center.
+        * MaxF(1 - AbsF(angle_distance) / 120, 0)
         * player_speed
         * 0.25
         // we divide by the right axis values so that using the right stick
