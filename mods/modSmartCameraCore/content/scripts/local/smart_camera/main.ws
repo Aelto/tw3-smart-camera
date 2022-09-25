@@ -39,16 +39,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     }
   }
 
-  camera = theGame.GetGameCamera();
-  camera.ChangePivotDistanceController( 'Default' );
-  camera.ChangePivotRotationController( 'Exploration' );
-  camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
-  moveData.pivotRotationController = camera.GetActivePivotRotationController();
-  moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
-  moveData.pivotPositionController = camera.GetActivePivotPositionController();
-  moveData.pivotPositionController.SetDesiredPosition( thePlayer.GetWorldPosition() );
-  moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
-
   if (!player.IsInCombat()) {
     player.smart_camera_data.time_before_target_fetch = -1;
     // player.smart_camera_data.combat_start_smoothing = 0;
@@ -59,6 +49,16 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   if (!player.smart_camera_data.settings.is_enabled_in_combat) {
     return false;
   }
+
+  camera = theGame.GetGameCamera();
+  camera.ChangePivotDistanceController( 'Default' );
+  camera.ChangePivotRotationController( 'Exploration' );
+  camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
+  moveData.pivotRotationController = camera.GetActivePivotRotationController();
+  moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
+  moveData.pivotPositionController = camera.GetActivePivotPositionController();
+  moveData.pivotPositionController.SetDesiredPosition( thePlayer.GetWorldPosition() );
+  moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
 
   player_position = player.GetWorldPosition();
   // 3 seconds 
@@ -110,7 +110,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
 
   if (player.smart_camera_data.camera_disable_cursor < 0) {
-    if (player.smart_camera_data.nearby_targets.Size()) {
+    if (player.smart_camera_data.nearby_targets.Size() > 0) {
       moveData.pivotRotationValue.Yaw = LerpAngleF(
         delta
           * player.smart_camera_data.settings.overall_speed
@@ -144,13 +144,25 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // Pitch correction //
   //////////////////////
   //#region pitch correction
+  rotation_to_target = VecToRotation(target_position - player_position);
+
 
   // some pitch correction if the mean position is too high compared to the
   // player, which means the target is probably off camera.
-  if (is_mean_position_too_high) {
-    if (player.smart_camera_data.update_y_direction_duration <= 0) {
-      player.smart_camera_data.update_y_direction_duration = 1;
-    }
+  if (thePlayer.IsCameraLockedToTarget()) {
+    moveData.pivotRotationController.SetDesiredPitch( rotation_to_target.Pitch - 15 );
+    moveData.pivotRotationValue.Pitch	= LerpAngleF(
+      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
+      moveData.pivotRotationValue.Pitch,
+      rotation_to_target.Pitch - 15
+    );
+  }
+  else if (is_mean_position_too_high) {
+    SC_updateCursor(
+      delta,
+      player.smart_camera_data.pitch_correction_cursor,
+      true
+    );
 
     rotation.Pitch = LerpAngleF(
       0.2,
@@ -168,32 +180,37 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // do pitch correction if the target is blocked by Geralt, but only if the 
   // pitch is not lower than the current one.
   // As pitch goes down, camera looks further down.
-  else if (!player.IsInCombatAction() && SC_shouldLowerPitch(player, target)) {
-    rotation_to_target = VecToRotation(target_position - player_position);
+  else if (!player.IsInCombatAction() && SC_shouldLowerPitch(player, target)
+        // only if the creature is near the player
+        && VecDistanceSquared2D(target_position, player_position) < 5 * 5
+        // only if the creature is not already higher than the player
+        && target_position.Z < player_position.Z + 1
+        // only if the camera is not already looking down
+        &&  rotation_to_target.Pitch - 30 < moveData.pivotRotationValue.Pitch) {
 
-    // only if the creature is near the player
-    if (VecDistanceSquared2D(target_position, player_position) < 3 * 3
-    // only if the creature is not already higher than the player
-    && target_position.Z < player_position.Z + 1
-    // only if the camera is not already looking down
-    &&  rotation_to_target.Pitch - 30 < moveData.pivotRotationValue.Pitch) {
-
-      if (player.smart_camera_data.update_y_direction_duration <= 0) {
-        player.smart_camera_data.update_y_direction_duration = 1;
-        player.smart_camera_data.corrected_y_direction = moveData.pivotRotationValue.Pitch - 10;
-      }
-
-      moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.corrected_y_direction );
-      moveData.pivotRotationValue.Pitch	= LerpAngleF(
-        delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
-        moveData.pivotRotationValue.Pitch,
-        player.smart_camera_data.corrected_y_direction
+      SC_updateCursor(
+        delta,
+        player.smart_camera_data.pitch_correction_cursor,
+        true
       );
-    }
+
+      moveData.pivotRotationController.SetDesiredPitch( rotation_to_target.Pitch - 30 );
+      moveData.pivotRotationValue.Pitch	= LerpAngleF(
+        delta
+          * player.smart_camera_data.settings.overall_speed
+          * player.smart_camera_data.combat_start_smoothing
+          * MaxF(player.smart_camera_data.pitch_correction_cursor, 0),
+        moveData.pivotRotationValue.Pitch,
+        rotation_to_target.Pitch - 30
+      );
 
   }
-  else if (player.smart_camera_data.update_y_direction_duration > 0) {
-    player.smart_camera_data.update_y_direction_duration -= delta * player.smart_camera_data.settings.overall_speed;
+  else if (player.smart_camera_data.pitch_correction_cursor > 0) {
+    SC_updateCursor(
+      delta,
+      player.smart_camera_data.pitch_correction_cursor,
+      false
+    );
 
     moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.desired_y_direction );
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
@@ -203,6 +220,12 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     );
   }
   else {
+    SC_updateCursor(
+      delta,
+      player.smart_camera_data.pitch_correction_cursor,
+      false
+    );
+
     player.smart_camera_data.desired_y_direction = moveData.pivotRotationValue.Pitch;
   }
   //#endregion pitch correction
@@ -307,6 +330,15 @@ function SC_getMeanPosition(positions: array<Vector>, player: CR4Player): Vector
 
   mean_position /= i;
   // mean_position += SC_getVelocityOffset(player);
+
+  // when the camera is locked on a target, put a much greater importance to the
+  // target.
+  if (thePlayer.IsCameraLockedToTarget()) {
+    i = positions.Size();
+
+    mean_position += i * thePlayer.GetTarget().GetWorldPosition();
+    mean_position /= i;
+  }
 
   return mean_position;
 }

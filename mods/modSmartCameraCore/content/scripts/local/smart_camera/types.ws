@@ -53,6 +53,7 @@ struct SC_data {
    * smooth transition.
    */
   var yaw_correction_cursor: float;
+  var pitch_correction_cursor: float;
 
   var interaction_focus_cursor: float;
 

@@ -5,6 +5,8 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   var rotation: EulerAngles;
   var player_speed: float;
   var angle_distance: float;
+  var camera: CCustomCamera;
+
 
   if (!player.smart_camera_data.settings.is_enabled_in_exploration) {
     return false;
@@ -59,6 +61,16 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   // different than the camera heading. But only after a 90 degrees difference.
   // Acts the same way as the Elden Ring camera.
   if (player_speed > 0 && player.smart_camera_data.settings.exploration_autocenter_enabled) {
+    // change the pivots only if there is something to do with the camera.
+    camera = theGame.GetGameCamera();
+    camera.ChangePivotDistanceController( 'Default' );
+    camera.ChangePivotRotationController( 'Exploration' );
+    camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
+    moveData.pivotRotationController = camera.GetActivePivotRotationController();
+    moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
+    moveData.pivotPositionController = camera.GetActivePivotPositionController();
+    moveData.pivotPositionController.SetDesiredPosition( thePlayer.GetWorldPosition() );
+    moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
     
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta
@@ -136,13 +148,13 @@ function SC_getUpdatedRotationToLookAtTarget(rotation: EulerAngles, player: CR4P
     rotation_to_target = VecToRotation(target_position - theCamera.GetCameraPosition());
 
     rotation.Yaw = LerpAngleF(
-      0.30 / (1 + player_speed),
+      0.30 / (1 + player_speed) * MaxF(player.smart_camera_data.interaction_focus_cursor, 0),
       rotation.Yaw,
       rotation_to_target.Yaw
     );
 
     rotation.Pitch = LerpAngleF(
-      0.30 / (1 + player_speed),
+      0.30 / (1 + player_speed) * MaxF(player.smart_camera_data.interaction_focus_cursor, 0),
       rotation.Pitch,
       -rotation_to_target.Pitch
     );
