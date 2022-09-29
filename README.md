@@ -3,7 +3,7 @@ A mod that controls the camera positioning during combat so that you don't have 
 manage it yourself. Mainly aimed at gamepads.
 
 # Showcase
- - [Horse camera demo](https://www.youtube.com/watch?v=5oB2PaFDnbI)
+ - [Horse camera demo](https://www.youtube.com/watch?v=D3hifPocpek)
  - [Combat camera demo](https://www.youtube.com/watch?v=Rky3QMizNRs)
 
 # Installing
