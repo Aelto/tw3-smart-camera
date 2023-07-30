@@ -1,5 +1,11 @@
 
 struct SC_data {
+
+  /**
+   * Set to the previously run camera mode
+   */
+  var previous_camera_mode: SC_cameraMode;
+
   /**
    * The time before a new fetch in seconds
    */
@@ -95,4 +101,9 @@ struct SC_settings {
   var horse_camera_zoom: float;
 
   var exploration_autocenter_enabled: bool;
+}
+
+enum SC_cameraMode {
+  SCCM_Exploration,
+  SCCM_Horse
 }

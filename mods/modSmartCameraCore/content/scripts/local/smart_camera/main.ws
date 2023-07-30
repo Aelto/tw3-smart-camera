@@ -18,6 +18,18 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     SC_reloadSettings(player.smart_camera_data.settings);
   }
 
+  /////////////////////
+  // Roll correction //
+  /////////////////////
+  //#region roll correction (left to right rotation)
+
+  // slowly bring back the rotation to 0 if it's not the case, for example if
+  // someone dismount from the horse camera while it had a roll angle.
+  if (player.smart_camera_data.previous_camera_mode == SCCM_Horse) {
+    moveData.pivotRotationValue.Roll = 0;
+  }
+  //#endregion roll correction
+
   if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
     player.smart_camera_data.time_before_target_fetch = -1;
 
@@ -38,6 +50,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       player.smart_camera_data.camera_disable_cursor = 1;
     }
   }
+
+  player.smart_camera_data.previous_camera_mode = SCCM_Exploration;
 
   if (!player.IsInCombat()) {
     player.smart_camera_data.time_before_target_fetch = -1;
