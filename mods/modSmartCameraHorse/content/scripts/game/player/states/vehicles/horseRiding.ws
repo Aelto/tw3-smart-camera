@@ -138,6 +138,7 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 			{
 				vehicleCombatMgr.OnDrawWeaponRequest();
 				parent.RemoveTimer('DrawWeaponIfNeeded');
+				thePlayer.ShouldAutoApplyOil();	
 			}
 		}
 		else
@@ -315,6 +316,13 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 		var horseComp				: W3HorseComponent;
 		var shouldStopCamera		: bool;
 		var angleDistanceBetweenCameraAndHorse : float;
+		
+		
+		var mult : float;
+		var sprintingAngle : float;
+		
+		
+		var didTrace : bool;
 
 		// SmartCamera - BEGIN
 		if (SC_horseOnCameraTickPostTick(parent, (W3HorseComponent)vehicle, (CCustomCamera)theCamera.GetTopmostCameraObject(), moveData, dt)) {
@@ -322,12 +330,11 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 		}
 		// SmartCamera - END
 		
-		
 		if ( !parent.IsAlive() )
 		{
 			moveData.pivotDistanceController.SetDesiredDistance( 4.0 );
 			moveData.pivotPositionController.SetDesiredPosition( parent.GetWorldPosition() );
-			moveData.pivotRotationController.SetDesiredPitch( -40 );
+			
 			return true;
 		}
 		
@@ -357,12 +364,18 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 		}
 		else if ( !horseComp.inCanter && !horseComp.inGallop && !horseComp.OnCheckHorseJump() )
 		{
-			moveData.pivotDistanceController.SetDesiredDistance( 2.4 );
-			currDesiredDist = 2.4;
+			moveData.pivotDistanceController.SetDesiredDistance( 3.5 ); 
+			currDesiredDist = 3.5;										
+			
+			
+			
+			
+			CalculateCurrentPitch(horseComp); 
+			didTrace = true;
 			
 			
 			if ( !horseComp.OnCheckHorseJump() )
-				moveData.pivotRotationController.SetDesiredPitch( horseComp.GetCurrentPitch() - 10 );
+				moveData.pivotRotationController.SetDesiredPitch( currentPitch - 10 );  
 		}
 		else if ( horseComp.inCanter && !horseComp.OnCheckHorseJump() )
 		{
@@ -371,8 +384,8 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 		}
 		else if ( horseComp.inGallop && !horseComp.OnCheckHorseJump() )
 		{
-			moveData.pivotDistanceController.SetDesiredDistance( 4.1f );
-			currDesiredDist = 4.1;
+			moveData.pivotDistanceController.SetDesiredDistance( 4.1f ); 
+			currDesiredDist = 4.1;										 
 		}
 		
 		if ( horseComp.OnCheckHorseJump() )
@@ -381,7 +394,12 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 		}
 		else
 		{
-			moveData.pivotRotationController.SetDesiredPitch( horseComp.GetCurrentPitch() - 10 );
+			
+			if(!didTrace)	
+				CalculateCurrentPitch(horseComp);
+			
+		
+			moveData.pivotRotationController.SetDesiredPitch( currentPitch - 10 );  
 		}
 		
 		if ( vehicleCombatMgr.IsInSwordAttackCombatAction() || horseComp.inCanter )
@@ -390,8 +408,56 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 		}
 		else
 			shouldStopCamera = false;
+		
+		
+		if(parent.GetHorseCamera())
+		{
+			moveData.pivotDistanceController.SetDesiredDistance( 1.5f );		
+			moveData.pivotPositionController.offsetZ = 2.2f;
 			
-		DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector(0,0,0), 0.3f, dt );			
+			sprintingAngle = AngleDistance(parent.GetHeading(), theCamera.GetCameraHeading());
+			if(sprintingAngle > 8)
+			{
+				sprintLeft = true;
+			}
+			else if(sprintLeft && sprintingAngle > 7)
+			{
+				sprintLeft = true;
+			}
+			else
+				sprintLeft = false;					
+
+			if(horseComp.inCanter)
+			{
+				mult = AbsF( sprintingAngle );
+				mult = mult/180;
+				mult = SqrF(mult) * -1;	
+			
+				if(sprintLeft && theInput.LastUsedGamepad())
+					DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( 0.3f, -0.42f + mult, 0.0f ), 0.7f, dt );
+				else
+					DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( 0.8f, -0.42f + mult, 0.0f ), 0.7f, dt );
+			}
+			else if(horseComp.inGallop)
+			{
+				if(sprintLeft && theInput.LastUsedGamepad())
+					DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( 0.3f, -0.9f, 0.1f ), 1.0f, dt );		
+				else
+					DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( 0.8f, -0.9f, 0.1f ), 1.0f, dt );		
+			}
+			else
+			{
+				mult = AbsF( AngleDistance(camera.GetHeading(), thePlayer.GetHeading()) );
+				mult = mult/180;
+				mult = SqrF(mult) * -1;		
+
+				DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( 0.8f, -0.7f + mult, 0.1f ), 1.0f, dt );	
+				sprintLeft = false;	
+			}
+		}
+		else
+		
+			DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector(0,0,0), 1.3f, dt );			
 		
 		if( horseComp.cameraMode == 1 )
 		{
@@ -442,6 +508,46 @@ state HorseRiding in CR4Player extends UseGenericVehicle
 
 		return shouldStopCamera;
 	}
+	
+	
+	
+	private var currentPitch : float;
+	private function CalculateCurrentPitch(horseComp : W3HorseComponent)
+	{
+		var pointA, pointB, outPosition, normal, playerPos : Vector;
+		var collisionGroupsNames : array<name>;
+		var rot : EulerAngles;
+		var distance : float;
+		var trace : bool;
+	
+		playerPos = thePlayer.GetWorldPosition();
+		pointA = playerPos;				
+		if(horseComp.inGallop)
+			distance = 2.f;
+		else if(horseComp.inCanter)
+			distance = 3.f;
+		else
+			distance = 1.f;
+		pointA += VecConeRand(thePlayer.GetHeading(), 0, distance, distance);
+		pointA.Z += 3.f;
+		pointB = pointA;
+		pointB.Z -= 10.f;			
+		collisionGroupsNames.PushBack('Terrain');
+		collisionGroupsNames.PushBack('Static');
+		
+		trace = theGame.GetWorld().StaticTrace( pointA, pointB, outPosition, normal, collisionGroupsNames );
+		rot = VecToRotation( VecNormalize( playerPos - outPosition ) );
+		
+		if(trace)
+			currentPitch = ClampF(rot.Pitch, -40.f, 40.f);
+		else
+			currentPitch = 0.f;
+	}
+	
+	
+	
+	var sprintLeft : bool;
+	
 	
 	
 	

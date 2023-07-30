@@ -99,6 +99,13 @@ state Combat in CR4Player extends ExtendedMovable
 	{
 		var i : int;
 		
+		
+		lerpAmount = 0;
+		geraltCmbtV = Vector(0.74,-0.38,0.147);
+		geraltCmbtRightV = Vector(0.184,-0.38,0.147);
+		geraltCmbtSignV = Vector(-0.35,-0.38,0.147);
+		
+		
 		parent.AddAnimEventCallback('AllowInput',		'OnAnimEvent_AllowInput');
 		parent.AddAnimEventCallback('AllowRoll',		'OnAnimEvent_AllowRoll');
 		parent.AddAnimEventCallback('ForceAttack',		'OnAnimEvent_ForceAttack');
@@ -301,7 +308,7 @@ state Combat in CR4Player extends ExtendedMovable
 	event OnGameCameraTick( out moveData : SCameraMovementData, dt : float )
 	{	
 		
-			
+
 		if( super.OnGameCameraTick( moveData, dt ) )
 		{
 			return true;
@@ -322,7 +329,18 @@ state Combat in CR4Player extends ExtendedMovable
 			moveData.pivotDistanceController.SetDesiredDistance( 3.5f );
 			moveData.pivotPositionController.offsetZ = 1.3f;
 			
-			DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( 1.0f, 2.0f, 0), 0.3f, dt );
+			
+			
+			if(parent.GetCmbtCamera())
+			{
+				
+			}
+			else
+			{
+				DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( 1.0f, 2.0f, 0), 0.3f, dt );
+			}
+			
+			
 			moveData.pivotRotationController.SetDesiredHeading( VecHeading( parent.GetDisplayTarget().GetWorldPosition() - parent.GetWorldPosition() ) + 60.0f, 0.5f );
 			
 			
@@ -349,6 +367,9 @@ state Combat in CR4Player extends ExtendedMovable
 	}
 	
 	
+	private var geraltCmbtV, geraltCmbtRightV, geraltCmbtSignV : Vector;
+	
+	
 	event OnGameCameraPostTick( out moveData : SCameraMovementData, dt : float )
 	{
 		var enemies : array<CActor> = parent.GetMoveTargets();
@@ -357,13 +378,31 @@ state Combat in CR4Player extends ExtendedMovable
 		var offset	:  float;
 		var playerToTargetVector	: Vector;
 		
+		
+		var pos, targetPos, camPos, distanceAndHeightOffset, screenPos : Vector;
+		var heading, offsetSide, offsetPitch, distanceOffset, heightOffset, vecHeadingTarget, vecHeadingPlayer, zDiff, screenPosMultiplier : float;
+		var right, normalize, dodging, closeSignCam, usingController : bool;
+		var target : CActor;
+		var camera : CCustomCamera;
+		var hostileEnemies : array<CActor>;
+
 		// smartcamera - BEGIN
 		if (SC_shouldDisableExplorationPosTick(parent)) {
 			return true;
 		}
 		// smartcamera - END
 		
-		if( parent.movementLockType == PMLT_NoRun && !GetWitcherPlayer().HasBuff( EET_Mutation11Immortal ) )
+		camera = theCamera.GetTopmostCamera();
+		
+		lerpAmount += dt/2;
+		lerpAmount = ClampF(lerpAmount,0,1);
+		
+		usingController = theInput.LastUsedGamepad();
+		
+		
+		
+		
+		if( parent.movementLockType == PMLT_NoRun && !GetWitcherPlayer().HasBuff( EET_Mutation11Immortal ) && !parent.GetCmbtCamera() ) 
 		{			
 			if ( enemies.Size() == 1 )
 			{
@@ -390,15 +429,19 @@ state Combat in CR4Player extends ExtendedMovable
 			virtual_parent.UpdateCameraSprint( moveData, dt );
 			
 		if ( virtual_parent.UpdateCameraForSpecialAttack( moveData, dt ) )
+		{
+			lerpAmount = 0; 
 			return true;
+		}
 		
 		if ( ( parent.IsCameraLockedToTarget()  ) && !cameraChanneledSignEnabled )
 		{
 			UpdateCameraInterior( moveData, dt );
-			return true;
+			if(!parent.GetCmbtCamera()) 
+				return true;
 		}			
 		
-		if ( parent.GetPlayerCombatStance() == PCS_AlertNear )
+		if ( parent.GetPlayerCombatStance() == PCS_AlertNear && !parent.GetCmbtCamera() )
 		{
 			if ( enemies.Size() <= 1 && parent.moveTarget)
 			{
@@ -407,14 +450,227 @@ state Combat in CR4Player extends ExtendedMovable
 				{
 					playerToTargetVector = parent.moveTarget.GetWorldPosition() - parent.GetWorldPosition();
 					offset = ( 2 - ( targetCapsuleHeight + playerToTargetVector.Z ) )/(-2);
-					offset = ClampF( offset, 0.f, 1.f );
+					offset = ClampF( offset, 0.f, 3.f );
 					DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( moveData.cameraLocalSpaceOffset.X, moveData.cameraLocalSpaceOffset.Y, moveData.cameraLocalSpaceOffset.Z + offset ), 1.f, dt );
 				}
 			}
 		}
 		
+		
+		if(parent.GetCmbtCamera()  )
+		{	
+			pos = parent.GetWorldPosition();
+			target = parent.GetTarget();	
+			targetPos = target.GetWorldPosition();
+			camPos = camera.GetWorldPosition();
+			heading = parent.GetHeading();
+			
+			zDiff = ClampF((targetPos.Z - pos.Z) * 3, -30.f, 30.f);
+
+			moveData.pivotPositionController.SetDesiredPosition( pos, 15.f );			
+			moveData.pivotPositionController.offsetZ = 1.15f;
+			
+			
+			hostileEnemies = parent.GetHostileEnemies();
+			distanceOffset = parent.GetHostileEnemiesCount();
+			distanceOffset = ClampF(distanceOffset, 1,4);
+			
+			
+			offsetSide = 6.f;
+
+			
+			
+			if(target && usingController)
+			{
+				
+				if(VecDistanceSquared(pos,targetPos) < VecDistanceSquared(camPos,targetPos))
+				{
+					vecHeadingTarget = VecHeading(targetPos - camPos);
+					vecHeadingPlayer = VecHeading(pos - camPos);
+					
+					if( AbsF(vecHeadingTarget) > 100 )
+					{
+						normalize = true;
+					}
+				
+					if(normalize)
+					{
+						if(AngleNormalize(vecHeadingTarget) > AngleNormalize(vecHeadingPlayer) )
+						{
+							offsetSide *= 0.25;	
+							right = true;				
+						}
+					}
+					else
+					{
+						if(vecHeadingTarget > vecHeadingPlayer )
+						{
+							offsetSide *= 0.25;	
+							right = true;	
+						}
+					}
+				}
+				
+				
+				if(cachedRight != right)
+				{
+					lerpAmount = 0;
+				}
+				cachedRight = right;
+				
+				
+				GetBaseScreenPosition(screenPos, target);
+				if(screenPos.X == 0)
+					screenPosMultiplier = 1.f;
+				else
+				{
+					screenPosMultiplier = AbsF(ClampF(screenPos.X - 960, -1920, 1920 ));
+					screenPosMultiplier = 1 - (screenPosMultiplier / 1920);
+				}				
+				
+				if(parent.GetSoftLockCameraAssist() && !thePlayer.GetIsSprinting() && target.IsAlive())
+				{
+					if(thePlayer.IsHardLockEnabled())
+					{
+						if(right)
+							moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos) - 15, 0.5f );
+						else
+							moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos) + 15, 0.5f );	
+					}
+					else
+					{
+						if(right)
+							moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos) - 15, 0.6f + screenPosMultiplier);
+						else
+							moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos) + 15, 0.6f + screenPosMultiplier);	
+					}
+						
+					
+					if(parent.GetBehaviorVariable( 'combatActionType' ) == (int)CAT_CiriDodge)
+						moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos), 2 );
+				}
+			}
+			
+			
+			if(target.IsHuman())
+			{
+				if(target && !thePlayer.IsHardLockEnabled())	
+					moveData.pivotRotationController.SetDesiredPitch( ClampF( -12 + zDiff, -25, 5 ) );
+			}
+			else
+			{
+				targetCapsuleHeight = ( (CMovingPhysicalAgentComponent)target.GetMovingAgentComponent() ).GetCapsuleHeight();
+				
+				
+				if(targetCapsuleHeight >= 1.81f && !((CNewNPC)target).IsFlying()) 
+				{
+					offsetPitch = ( -VecDistance(pos,targetPos) + targetCapsuleHeight ) * 2;
+																						 
+					if(target)
+						moveData.pivotRotationController.SetDesiredPitch( ClampF( offsetPitch + zDiff, -25, 5 ) );
+					
+					distanceOffset = ClampF(distanceOffset + targetCapsuleHeight/2, 1,5);
+				}
+				else
+				{
+					if(target && !thePlayer.IsHardLockEnabled())	
+						moveData.pivotRotationController.SetDesiredPitch( -12 + zDiff );
+				}
+			}
+			
+			distanceOffset = distanceOffset / 1.3;
+			heightOffset = distanceOffset / 1.5;
+			
+			distanceOffset = MaxF(distanceOffset, 1);
+			heightOffset = MaxF(heightOffset, 1);
+			
+			if(thePlayer.IsFistFightMinigameEnabled())
+				distanceOffset = 0.3;
+			
+			
+			if(cachedDistanceOffset != distanceOffset || cachedHeightOffset != heightOffset)
+				lerpAmount = 0;
+			cachedDistanceOffset = distanceOffset;
+			cachedHeightOffset = heightOffset;			
+			distanceAndHeightOffset = Vector(0, -cachedDistanceOffset * 0.2, cachedHeightOffset * 0.1);
+			
+			
+			dodging = parent.IsCurrentlyDodging();
+			if(cachedDodging != dodging)
+			{
+				lerpAmount = 0;
+			}
+			cachedDodging = dodging;
+			
+			if(!thePlayer.IsCiri() && cachedDodging)
+			{		
+				
+				moveData.pivotDistanceController.SetDesiredDistance( 3.0f );	
+				moveData.pivotPositionController.SetDesiredPosition( pos, 25.f );
+				moveData.pivotPositionController.offsetZ = 1.15f;	
+	
+				if(thePlayer.IsHardLockEnabled())
+					DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( offsetSide * 1.4, -3.1f* distanceOffset, 1.2f * heightOffset ), 5.0f, dt );
+				else
+					DampVectorSpring( moveData.cameraLocalSpaceOffset, moveData.cameraLocalSpaceOffsetVel, Vector( offsetSide, -3.1f* distanceOffset, 1.2f * heightOffset ), 5.0f, dt );
+			}				
+			else
+			{
+				
+				moveData.pivotDistanceController.SetDesiredDistance( 1.5f );
+				
+				closeSignCam = parent.GetCloseSignCam();
+				if(cachedSignCam != closeSignCam)
+				{
+					lerpAmount = 0;
+				}
+				cachedSignCam = closeSignCam;
+				
+				if( cachedSignCam && usingController )
+				{
+					if( cachedRight )
+						moveData.cameraLocalSpaceOffset = LerpV(moveData.cameraLocalSpaceOffset, geraltCmbtSignV + distanceAndHeightOffset, lerpAmount);
+					else
+						moveData.cameraLocalSpaceOffset = LerpV(moveData.cameraLocalSpaceOffset, geraltCmbtV + distanceAndHeightOffset, lerpAmount);
+				}
+				else if ( cachedRight && usingController )
+					moveData.cameraLocalSpaceOffset = LerpV(moveData.cameraLocalSpaceOffset, geraltCmbtRightV + distanceAndHeightOffset, lerpAmount);
+				else
+					moveData.cameraLocalSpaceOffset = LerpV(moveData.cameraLocalSpaceOffset, geraltCmbtV + distanceAndHeightOffset, lerpAmount);
+				moveData.cameraLocalSpaceOffsetVel = Vector(0,0,0);	
+			}
+		}
+		else
+		{
+			lerpAmount = 0;
+			
+			pos = parent.GetWorldPosition();
+			target = parent.GetTarget();	
+			targetPos = target.GetWorldPosition();
+			if(target && theInput.LastUsedGamepad())
+			{
+				if(parent.GetSoftLockCameraAssist() && !thePlayer.GetIsSprinting() && target.IsAlive())
+				{
+					if(right)
+						moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos) - 15 );
+					else
+						moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos) + 15 );	
+						
+					
+					if(parent.GetBehaviorVariable( 'combatActionType' ) == (int)CAT_CiriDodge)
+						moveData.pivotRotationController.SetDesiredHeading( VecHeading(targetPos - pos), 2 );
+				}
+			}
+		}
+		
+
 		super.OnGameCameraPostTick( moveData, dt );
 	}
+	
+	
+	private var cachedRight, cachedDodging, cachedSignCam : bool;
+	private var lerpAmount, cachedDistanceOffset, cachedHeightOffset : float;
+	
 
 	
 	private function ProcessPlayerOrientation()
@@ -1490,7 +1746,20 @@ state Combat in CR4Player extends ExtendedMovable
 		actor = (CActor)parent.slideTarget;
 		npc = (CNewNPC)parent.slideTarget;
 		
+		
+		
+		if(playerAttackType == theGame.params.ATTACK_NAME_LIGHT)
+		{
+			FactsAdd("ach_attack_light", 1, 4 );
+		}
+		else if(playerAttackType == theGame.params.ATTACK_NAME_HEAVY)
+		{
+			FactsAdd("ach_attack_heavy", 1, 4 );
+		}
+		
+		
 		FactsAdd("ach_attack", 1, 4 );
+		
 		theGame.GetGamerProfile().CheckLearningTheRopes();
 		if ( actor && ( !npc || npc.GetCurrentStance() != NS_Fly ) )
 		{	
