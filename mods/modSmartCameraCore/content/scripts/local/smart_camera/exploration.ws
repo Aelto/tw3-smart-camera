@@ -61,6 +61,12 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   // different than the camera heading. But only after a 90 degrees difference.
   // Acts the same way as the Elden Ring camera.
   if (player_speed > 0 && player.smart_camera_data.settings.exploration_autocenter_enabled) {
+    // while the player is handling the right axis stick, the yaw correction is
+    // progressively disabled
+    if (theInput.GetActionValue('GI_AxisRightX') + theInput.GetActionValue('GI_AxisRightY') != 0) {
+      player.smart_camera_data.yaw_correction_cursor = -2;
+    }
+
     // change the pivots only if there is something to do with the camera.
     camera = theGame.GetGameCamera();
     camera.ChangePivotDistanceController( 'Default' );
@@ -73,19 +79,25 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
     
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta
+      (
+        delta
         * MaxF(AbsF(angle_distance) / 90 - 0.3, 0)
-        // a number that reaches zero once the angle distance reaches 120, this
-        // disables the autocenter the closer Geralt goes towards the camera.
-        // For example when you do a 180 degrees turn the camera should not auto
-        // center.
-        * MaxF(1 - AbsF(angle_distance) / 120, 0)
         * player_speed
         * 0.25
         // we divide by the right axis values so that using the right stick
         // reduces the auto-center speed
         / (1 + AbsF(theInput.GetActionValue('GI_AxisRightX')) + AbsF(theInput.GetActionValue('GI_AxisRightY')))
-        + 0.05 * delta * player_speed,
+        + 0.05 * delta * player_speed
+      )
+      // the value of the cursor also controls the strength of the correction,
+      // the cursor's value is also updated if the player is manually tweaking
+      // the camera.
+      * MaxF(player.smart_camera_data.yaw_correction_cursor, 0)
+      // a number that reaches zero once the angle distance reaches 120, this
+      // disables the autocenter the closer Geralt goes towards the camera.
+      // For example when you do a 180 degrees turn the camera should not auto
+      // center.
+      * MaxF(1 - AbsF(angle_distance) / 120, 0),
       moveData.pivotRotationValue.Yaw,
       player.GetHeading()
     );
