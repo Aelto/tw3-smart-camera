@@ -64,7 +64,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     );
 
     moveData.pivotRotationValue.Pitch = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 2) + 0.01),
+      delta * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 3) + 0.01),
       moveData.pivotRotationValue.Pitch,
       pelvis_torso_angle.Pitch - 15
     );
