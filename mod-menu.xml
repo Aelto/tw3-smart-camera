@@ -12,7 +12,7 @@
         <Entry varId="SCoverallSpeed" value="2" />
         <Entry varId="SCcameraFov" value="60" />
         <Entry varId="SCcameraHeight" value="0.8" />
-        <Entry varId="SChorseCameraZoom" value="5" />
+        <Entry varId="SChorseCameraZoom" value="1" />
         <Entry varId="SCexplorationAutoCenterEnabled" value="1" />
       </Preset>
     </PresetsArray>
@@ -29,7 +29,7 @@
         <Var id="SCcameraFov" displayName="sc_camera_fov" displayType="SLIDER;0;120;120" />
         <Var id="SCcameraHeight" displayName="sc_camera_height" displayType="SLIDER;0;10;100" />
         <Var id="SCcameraHorizontalPosition" displayName="sc_camera_horizontal_position" displayType="SLIDER;-10;10;100" />
-        <Var id="SChorseCameraZoom" displayName="sc_horse_camera_zoom" displayType="SLIDER;0;10;100" />
+        <Var id="SChorseCameraZoom" displayName="sc_horse_camera_zoom" displayType="SLIDER;0;2;100" />
         <Var id="SCexplorationAutoCenterEnabled" displayName="sc_exploration_auto_center" displayType="TOGGLE" />
     </VisibleVars>
   </Group>

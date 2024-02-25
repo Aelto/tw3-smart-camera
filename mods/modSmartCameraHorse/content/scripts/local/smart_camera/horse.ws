@@ -107,18 +107,15 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   /////////////////////
   //#region zoom correction
 
-  // an offset users can set from the menus, the default value is 5, below
-  // 5 and the camera gets closer, higher than 5 and its goes further away
-  if (player.smart_camera_data.settings.horse_camera_zoom == 5) {
-    horse_zoom_offset = 1;
-  }
-  else if (player.smart_camera_data.settings.horse_camera_zoom < 5) {
-    horse_zoom_offset = 1 / ((5 - player.smart_camera_data.settings.horse_camera_zoom) * 10);
-  }
-  else {
-    horse_zoom_offset = player.smart_camera_data.settings.horse_camera_zoom - 5;
-  }
+  // an offset users can set from the menus, the default value is 1, below
+  // 1 and the camera gets closer, higher than 1 and its goes further away
+  horse_zoom_offset = (-2 * player.smart_camera_data.settings.horse_camera_zoom)
+                      * MinF(absolute_angle_distance, 90)
+                      * horse_speed
+                      * 0.002
+                      * (float)player.smart_camera_data.horse_auto_center_enabled;
 
+  moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset);
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
     moveData.cameraLocalSpaceOffsetVel,
@@ -128,15 +125,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
       pelvis_torso_angle.Yaw * 0.002,
 
       // y axis: horizontal position, front to back
-        (-2 * horse_zoom_offset)
-          + MinF(absolute_angle_distance, 90)
-          * horse_speed
-          * 0.02
-          * (float)player.smart_camera_data.horse_auto_center_enabled
-          * horse_zoom_offset
-          // this one is to compensate for the default value of `horse_zoom_offset`
-          // of 5.
-          * 0.2,
+      horse_zoom_offset,
       // z axis: vertical position, bottom to top
       0
     ),
