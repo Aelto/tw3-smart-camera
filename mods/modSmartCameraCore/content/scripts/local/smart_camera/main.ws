@@ -97,6 +97,33 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   mean_position = SC_getMeanPosition(positions, player);
   is_mean_position_too_high = mean_position.Z - player_position.Z > 3.5;
 
+  // LERP the mean position to smooth out the movements
+  if (
+    player.smart_camera_data.combat_look_at_position.X == 0
+    && player.smart_camera_data.combat_look_at_position.Y == 0
+  ) {
+    player.smart_camera_data.combat_look_at_position = mean_position;
+  }
+  else {
+    player.smart_camera_data.combat_look_at_position.X = LerpF(
+      delta * (player.smart_camera_data.settings.overall_speed * 0.5),
+      player.smart_camera_data.combat_look_at_position.X,
+      mean_position.X
+    );
+
+    player.smart_camera_data.combat_look_at_position.Y = LerpF(
+      delta * (player.smart_camera_data.settings.overall_speed * 0.5),
+      player.smart_camera_data.combat_look_at_position.Y,
+      mean_position.Y
+    );
+
+    player.smart_camera_data.combat_look_at_position.Z = LerpF(
+      delta * (player.smart_camera_data.settings.overall_speed * 0.5),
+      player.smart_camera_data.combat_look_at_position.Z,
+      mean_position.Z
+    );
+  }
+
   rotation = SC_getRotationToLookAtPosition(
     mean_position,
     player

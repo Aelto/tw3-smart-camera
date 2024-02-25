@@ -49,6 +49,13 @@ struct SC_data {
   var horse_auto_center_enabled: bool;
 
   /**
+   * Tracks the look_at position of the camera, it is used to LERP the
+   * translations in order to avoid having a fast moving camera going from left
+   * to right constantly.
+   */
+  var combat_look_at_position: Vector;
+
+  /**
    * a cursor is a float value that can be positive as well as negative and is
    * changed based on multiple factors.
    * Then depending on the value of the cursor actions are applied, for example
