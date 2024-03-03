@@ -10,16 +10,17 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     return false;
   }
 
-  player.smart_camera_data.previous_camera_mode = SCCM_Exploration;
-
   player.smart_camera_data.time_before_settings_fetch -= delta;
-  if (player.smart_camera_data.time_before_settings_fetch <= 0 || player.smart_camera_data.horse_bone_index_pelvis < -999) {
+  if (player.smart_camera_data.time_before_settings_fetch <= 0 || player.smart_camera_data.horse_bone_index_pelvis < -999 || player.smart_camera_data.previous_camera_mode != SCCM_Horse) {
     player.smart_camera_data.time_before_settings_fetch = 10;
     SC_reloadSettings(player.smart_camera_data.settings);
 
     player.smart_camera_data.horse_bone_index_torso = horse.GetEntity().GetBoneIndex('head');
     player.smart_camera_data.horse_bone_index_pelvis = horse.GetEntity().GetBoneIndex('pelvis');
   }
+
+  player.smart_camera_data.previous_camera_mode = SCCM_Horse;
+
 
   if (!theInput.LastUsedGamepad()) {
     if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
