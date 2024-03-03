@@ -72,6 +72,12 @@ struct SC_data {
 
   var camera_disable_cursor: float;
 
+  var player_bone_index_rhand: int;
+  default player_bone_index_rhand = -999;
+
+  var player_bone_index_head: int;
+  default player_bone_index_head = -999;
+
   var horse_bone_index_torso: int;
   var horse_bone_index_pelvis: int;
   default horse_bone_index_pelvis = -999;

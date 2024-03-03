@@ -1,11 +1,14 @@
 
 function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
+  var player_to_camera_heading_distance: float;
   var new_entities: array<CGameplayEntity>;
   var is_mean_position_too_high: bool;
   var rotation_to_target: EulerAngles;
+  var head_to_hand_offset: Vector;
   var positions: array<Vector>;
   var player_position: Vector;
   var target_position: Vector;
+  var player_heading: float;
   var mean_position: Vector;
   var rotation: EulerAngles;
   var camera: CCustomCamera;
@@ -16,6 +19,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   if (player.smart_camera_data.time_before_settings_fetch <= 0) {
     player.smart_camera_data.time_before_settings_fetch = 10;
     SC_reloadSettings(player.smart_camera_data.settings);
+
+    player.smart_camera_data.player_bone_index_rhand = player.GetBoneIndex('r_hand');
+    player.smart_camera_data.player_bone_index_head = player.GetBoneIndex('head');
   }
 
   /////////////////////
@@ -75,6 +81,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
 
   player_position = player.GetWorldPosition();
+  player_heading = player.GetHeading();
   // 3 seconds 
   player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
 
@@ -129,6 +136,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     player
   );
 
+  head_to_hand_offset = thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_rhand)
+                      - thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_head);
+
   player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
     * delta
     * player.smart_camera_data.settings.horizontal_sensitivity;
@@ -167,7 +177,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     // or if the camera is disabled because the player is sprinting for a few
     // seconds
     else {
-      rotation.Yaw = thePlayer.GetHeading();
+      rotation.Yaw = player_heading;
 
       moveData.pivotRotationValue.Yaw = LerpAngleF(
         delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
@@ -280,16 +290,41 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions);
   //#endregion zoom correction
 
+  player_to_camera_heading_distance = AngleDistance(
+    player_heading,
+    moveData.pivotRotationValue.Yaw
+  );
+
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
     moveData.cameraLocalSpaceOffsetVel,
     Vector(
       // x axis: horizontal position, left to right
-      player.smart_camera_data.settings.camera_horizontal_position,
+      player.smart_camera_data.settings.camera_horizontal_position
+
+        // the number in the multiplication controls the intensity
+        // the numbers in the clamp control the maximum distance
+        + ClampF(head_to_hand_offset.X * -7, -1.5, 1.5)
+        // this should only apply to the head_to_hand_offset:
+        // tone down the offset the further the camera is from the player's heading
+        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
+
       // y axis: horizontal position, front to back
-      4 - player.smart_camera_data.settings.camera_zoom + back_offset + ((int)is_mean_position_too_high * -1),
+      4 
+        - player.smart_camera_data.settings.camera_zoom
+        + back_offset + ((int)is_mean_position_too_high * -1)
+
+        + ClampF(head_to_hand_offset.Y * -4, -0.5, 1)
+        // this should only apply to the head_to_hand_offset
+        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
+
       // z axis: vertical position, bottom to top
-      player.smart_camera_data.settings.camera_height + ((int)is_mean_position_too_high * 0.2)
+      player.smart_camera_data.settings.camera_height
+        + ((int)is_mean_position_too_high * 0.2)
+
+        + ClampF(head_to_hand_offset.Z * 0.5, -0.2, 0.2)
+        // this should only apply to the head_to_hand_offset
+        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0)
     ),
     0.5f,
     delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing
