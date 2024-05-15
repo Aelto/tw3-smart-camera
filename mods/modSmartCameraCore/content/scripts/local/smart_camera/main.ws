@@ -1,9 +1,9 @@
 
 function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
   var player_to_camera_heading_distance: float;
-  var new_entities: array<CGameplayEntity>;
   var is_mean_position_too_high: bool;
   var rotation_to_target: EulerAngles;
+  var hostile_enemies: array<CActor>;
   var head_to_hand_offset: Vector;
   var positions: array<Vector>;
   var player_position: Vector;
@@ -37,8 +37,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   //#endregion roll correction
 
   if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
-    player.smart_camera_data.time_before_target_fetch = -1;
-
     return false;
   }
 
@@ -60,9 +58,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   player.smart_camera_data.previous_camera_mode = SCCM_Exploration;
 
   if (!player.IsInCombat()) {
-    player.smart_camera_data.time_before_target_fetch = -1;
-    // player.smart_camera_data.combat_start_smoothing = 0;
-
     return SC_onGameCameraTick_outOfCombat(player, moveData, delta);
   }
 
@@ -85,19 +80,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // 3 seconds 
   player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
 
-  player.smart_camera_data.time_before_target_fetch -= delta;
-  if (player.smart_camera_data.time_before_target_fetch <= 0) {
-    player.smart_camera_data.time_before_target_fetch = 5;
-
-    new_entities = SC_fetchNearbyTargets(player);
-
-    if (new_entities.Size() > 0) {
-      player.smart_camera_data.nearby_targets = new_entities;
-    }
-  }
-
-  SC_removeDeadEntities(player.smart_camera_data.nearby_targets);
-  positions = SC_getEntitiesPositions(player.smart_camera_data.nearby_targets);
+  hostile_enemies = player.GetHostileEnemies();
+  positions = SC_getEntitiesPositions(hostile_enemies);
   target = player.GetTarget();
   target_position = target.GetWorldPosition();
 
@@ -161,7 +145,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
 
   if (player.smart_camera_data.camera_disable_cursor < 0) {
-    if (player.smart_camera_data.nearby_targets.Size() > 0) {
+    if (hostile_enemies.Size() > 0) {
       moveData.pivotRotationValue.Yaw = LerpAngleF(
         delta
           * player.smart_camera_data.settings.overall_speed
@@ -448,7 +432,7 @@ function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
   return filtered_entities;
 }
 
-function SC_getEntitiesPositions(entities: array<CGameplayEntity>): array<Vector> {
+function SC_getEntitiesPositions(entities: array<CActor>): array<Vector> {
   var output: array<Vector>;
   var size: int;
   var i: int;

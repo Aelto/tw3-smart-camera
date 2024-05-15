@@ -7,16 +7,6 @@ struct SC_data {
   var previous_camera_mode: SC_cameraMode;
 
   /**
-   * The time before a new fetch in seconds
-   */
-  var time_before_target_fetch: float;
-
-  /**
-   * Cached nearby targets
-   */
-  var nearby_targets: array<CGameplayEntity>;
-
-  /**
    * The user can tell the camera to move a little left and right. This value
    * stores the desired direction on the X axis.
    */
