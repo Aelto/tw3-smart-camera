@@ -407,31 +407,6 @@ function SC_getRotationToLookAtPosition(mean_position: Vector, player: CR4Player
   return VecToRotation(mean_position - player.GetWorldPosition());
 }
 
-function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
-  var filtered_entities: array<CGameplayEntity>;
-  var entities: array<CGameplayEntity>;
-  var i: int;
-
-  FindGameplayEntitiesInRange(
-    entities,
-    player,
-    15,
-    10,,
-    FLAG_OnlyAliveActors | FLAG_ExcludePlayer | FLAG_Attitude_Hostile,
-    player
-  );
-
-  for (i = 0; i < entities.Size(); i += 1) {
-    if (((CActor)entities[i]).GetTarget() != player) {
-      continue;
-    }
-
-    filtered_entities.PushBack(entities[i]);
-  }
-
-  return filtered_entities;
-}
-
 function SC_getEntitiesPositions(entities: array<CActor>): array<Vector> {
   var output: array<Vector>;
   var size: int;
@@ -484,24 +459,4 @@ function SC_getPositionsAroundOrigin(origin: Vector, positions: array<Vector>, r
   }
 
   return output;
-}
-
-function SC_removeDeadEntities(out entities: array<CGameplayEntity>): int {
-  var i: int;
-  var max: int;
-  var removed_count: int;
-
-  max = entities.Size();
-
-  for (i = 0; i < max; i += 1) {
-    if (!((CActor)entities[i]).IsAlive() || ((CActor)entities[i]).GetHealthPercents() <= 0.01) {
-      entities.Remove(entities[i]);
-
-      max -= 1;
-      i -= 1;
-      removed_count += 1;
-    }
-  }
-
-  return removed_count;
 }
