@@ -1,4 +1,40 @@
 
+function SC_onGameCameraTickCheck(
+  player: CR4Player, out moveData: SCameraMovementData, delta: float
+): bool {
+  player.smart_camera_data.time_before_settings_fetch -= delta;
+  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
+    player.smart_camera_data.time_before_settings_fetch = 10;
+    SC_reloadSettings(player.smart_camera_data.settings);
+
+    player.smart_camera_data.player_bone_index_rhand = player.GetBoneIndex('r_hand');
+    player.smart_camera_data.player_bone_index_head = player.GetBoneIndex('head');
+  }
+
+  if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
+    return false;
+  }
+
+  if (thePlayer.IsCameraLockedToTarget() || thePlayer.IsCurrentSignChanneled() && thePlayer.GetCurrentlyCastSign() == ST_Igni) {
+    return false;
+  }
+
+  if (!theInput.LastUsedGamepad()) {
+    if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
+      return false;
+    }
+  }
+
+  if (player.IsInCombat() && !player.smart_camera_data.settings.is_enabled_in_combat) {
+    return false;
+  }
+  else if (!player.smart_camera_data.settings.is_enabled_in_exploration) {
+    return false;
+  }
+
+  return true;
+}
+
 function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
   var player_to_camera_heading_distance: float;
   var is_mean_position_too_high: bool;
@@ -15,14 +51,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var back_offset: float;
   var target: CActor;
 
-  player.smart_camera_data.time_before_settings_fetch -= delta;
-  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
-    player.smart_camera_data.time_before_settings_fetch = 10;
-    SC_reloadSettings(player.smart_camera_data.settings);
-
-    player.smart_camera_data.player_bone_index_rhand = player.GetBoneIndex('r_hand');
-    player.smart_camera_data.player_bone_index_head = player.GetBoneIndex('head');
-  }
+  
 
   /////////////////////
   // Roll correction //
@@ -36,19 +65,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
   //#endregion roll correction
 
-  if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
-    return false;
-  }
-
-  if (thePlayer.IsCameraLockedToTarget() || thePlayer.IsCurrentSignChanneled() && thePlayer.GetCurrentlyCastSign() == ST_Igni) {
-    return false;
-  }
-
   if (!theInput.LastUsedGamepad()) {
-    if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
-      return false;
-    }
-
     if (theInput.GetActionValue('GI_MouseDampX') != 0
      || theInput.GetActionValue('GI_MouseDampY') != 0) {
       player.smart_camera_data.camera_disable_cursor = 1;
