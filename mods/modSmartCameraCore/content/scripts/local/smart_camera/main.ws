@@ -1,9 +1,45 @@
 
+function SC_onGameCameraTickCheck(
+  player: CR4Player, out moveData: SCameraMovementData, delta: float
+): bool {
+  player.smart_camera_data.time_before_settings_fetch -= delta;
+  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
+    player.smart_camera_data.time_before_settings_fetch = 10;
+    SC_reloadSettings(player.smart_camera_data.settings);
+
+    player.smart_camera_data.player_bone_index_rhand = player.GetBoneIndex('r_hand');
+    player.smart_camera_data.player_bone_index_head = player.GetBoneIndex('head');
+  }
+
+  if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
+    return false;
+  }
+
+  if (thePlayer.IsCameraLockedToTarget() || thePlayer.IsCurrentSignChanneled() && thePlayer.GetCurrentlyCastSign() == ST_Igni) {
+    return false;
+  }
+
+  if (!theInput.LastUsedGamepad()) {
+    if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
+      return false;
+    }
+  }
+
+  if (player.IsInCombat() && !player.smart_camera_data.settings.is_enabled_in_combat) {
+    return false;
+  }
+  else if (!player.smart_camera_data.settings.is_enabled_in_exploration) {
+    return false;
+  }
+
+  return true;
+}
+
 function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
   var player_to_camera_heading_distance: float;
-  var new_entities: array<CGameplayEntity>;
   var is_mean_position_too_high: bool;
   var rotation_to_target: EulerAngles;
+  var hostile_enemies: array<CActor>;
   var head_to_hand_offset: Vector;
   var positions: array<Vector>;
   var player_position: Vector;
@@ -15,14 +51,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var back_offset: float;
   var target: CActor;
 
-  player.smart_camera_data.time_before_settings_fetch -= delta;
-  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
-    player.smart_camera_data.time_before_settings_fetch = 10;
-    SC_reloadSettings(player.smart_camera_data.settings);
-
-    player.smart_camera_data.player_bone_index_rhand = player.GetBoneIndex('r_hand');
-    player.smart_camera_data.player_bone_index_head = player.GetBoneIndex('head');
-  }
+  
 
   /////////////////////
   // Roll correction //
@@ -36,21 +65,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
   //#endregion roll correction
 
-  if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
-    player.smart_camera_data.time_before_target_fetch = -1;
-
-    return false;
-  }
-
-  if (thePlayer.IsCameraLockedToTarget() || thePlayer.IsCurrentSignChanneled() && thePlayer.GetCurrentlyCastSign() == ST_Igni) {
-    return false;
-  }
-
   if (!theInput.LastUsedGamepad()) {
-    if (!player.smart_camera_data.settings.is_enabled_with_mouse) {
-      return false;
-    }
-
     if (theInput.GetActionValue('GI_MouseDampX') != 0
      || theInput.GetActionValue('GI_MouseDampY') != 0) {
       player.smart_camera_data.camera_disable_cursor = 1;
@@ -60,9 +75,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   player.smart_camera_data.previous_camera_mode = SCCM_Exploration;
 
   if (!player.IsInCombat()) {
-    player.smart_camera_data.time_before_target_fetch = -1;
-    // player.smart_camera_data.combat_start_smoothing = 0;
-
     return SC_onGameCameraTick_outOfCombat(player, moveData, delta);
   }
 
@@ -85,19 +97,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // 3 seconds 
   player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
 
-  player.smart_camera_data.time_before_target_fetch -= delta;
-  if (player.smart_camera_data.time_before_target_fetch <= 0) {
-    player.smart_camera_data.time_before_target_fetch = 5;
-
-    new_entities = SC_fetchNearbyTargets(player);
-
-    if (new_entities.Size() > 0) {
-      player.smart_camera_data.nearby_targets = new_entities;
-    }
-  }
-
-  SC_removeDeadEntities(player.smart_camera_data.nearby_targets);
-  positions = SC_getEntitiesPositions(player.smart_camera_data.nearby_targets);
+  hostile_enemies = player.GetHostileEnemies();
+  positions = SC_getEntitiesPositions(hostile_enemies);
   target = player.GetTarget();
   target_position = target.GetWorldPosition();
 
@@ -161,7 +162,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
 
   if (player.smart_camera_data.camera_disable_cursor < 0) {
-    if (player.smart_camera_data.nearby_targets.Size() > 0) {
+    if (hostile_enemies.Size() > 0) {
       moveData.pivotRotationValue.Yaw = LerpAngleF(
         delta
           * player.smart_camera_data.settings.overall_speed
@@ -423,32 +424,7 @@ function SC_getRotationToLookAtPosition(mean_position: Vector, player: CR4Player
   return VecToRotation(mean_position - player.GetWorldPosition());
 }
 
-function SC_fetchNearbyTargets(player: CR4Player): array<CGameplayEntity> {
-  var filtered_entities: array<CGameplayEntity>;
-  var entities: array<CGameplayEntity>;
-  var i: int;
-
-  FindGameplayEntitiesInRange(
-    entities,
-    player,
-    15,
-    10,,
-    FLAG_OnlyAliveActors | FLAG_ExcludePlayer | FLAG_Attitude_Hostile,
-    player
-  );
-
-  for (i = 0; i < entities.Size(); i += 1) {
-    if (((CActor)entities[i]).GetTarget() != player) {
-      continue;
-    }
-
-    filtered_entities.PushBack(entities[i]);
-  }
-
-  return filtered_entities;
-}
-
-function SC_getEntitiesPositions(entities: array<CGameplayEntity>): array<Vector> {
+function SC_getEntitiesPositions(entities: array<CActor>): array<Vector> {
   var output: array<Vector>;
   var size: int;
   var i: int;
@@ -500,24 +476,4 @@ function SC_getPositionsAroundOrigin(origin: Vector, positions: array<Vector>, r
   }
 
   return output;
-}
-
-function SC_removeDeadEntities(out entities: array<CGameplayEntity>): int {
-  var i: int;
-  var max: int;
-  var removed_count: int;
-
-  max = entities.Size();
-
-  for (i = 0; i < max; i += 1) {
-    if (!((CActor)entities[i]).IsAlive() || ((CActor)entities[i]).GetHealthPercents() <= 0.01) {
-      entities.Remove(entities[i]);
-
-      max -= 1;
-      i -= 1;
-      removed_count += 1;
-    }
-  }
-
-  return removed_count;
 }
