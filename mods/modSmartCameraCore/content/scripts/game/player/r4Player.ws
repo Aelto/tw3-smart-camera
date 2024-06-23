@@ -4136,12 +4136,6 @@ statemachine abstract import class CR4Player extends CPlayer
 		{
 			return true;
 		}
-
-		// smartcamera - BEGIN
-		if (SC_onGameCameraTick(this, moveData, dt)) {
-			return true;
-		}
-		// smartcamera - END
 		
 		
 		if ( theGame.IsFocusModeActive() )
