@@ -218,12 +218,11 @@ statemachine abstract import class CR4Player extends CPlayer
 	default upscaledTooltipState = false;
 	
 	
-	private var phantomWeaponMgr : CPhantomWeaponManager;
-
 	// smartcamera - BEGIN
 	var smart_camera_data: SC_data;
 	default smart_camera_data = SC_data();
 	// smartcamera - END
+	private var phantomWeaponMgr : CPhantomWeaponManager;
 	
 	
 
