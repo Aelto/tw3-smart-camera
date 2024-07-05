@@ -110,11 +110,15 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
 
   // an offset users can set from the menus, the default value is 1, below
   // 1 and the camera gets closer, higher than 1 and its goes further away
-  horse_zoom_offset = (-2 * player.smart_camera_data.settings.horse_camera_zoom)
-                      * MinF(absolute_angle_distance, 90)
+  horse_zoom_offset = (-1 * player.smart_camera_data.settings.horse_camera_zoom)
+                      // the + makes the camera go closer to the horse during angles
+                      + MinF(absolute_angle_distance, 90)
                       * horse_speed
                       * 0.002
-                      * (float)player.smart_camera_data.horse_auto_center_enabled;
+                      * (float)player.smart_camera_data.horse_auto_center_enabled
+                      * player.smart_camera_data.settings.horse_camera_zoom;
+
+  LogChannel('SmartCamera', "horse_zoom_offset = " + horse_zoom_offset);
 
   moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset);
   DampVectorSpring(
