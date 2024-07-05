@@ -6,6 +6,7 @@ function SC_reloadSettings(out settings: SC_settings) {
   settings.is_enabled_on_boat = SC_isEnabledOnBoat();
   settings.is_enabled_with_mouse = SC_isEnabledWithMouse();
   settings.camera_zoom = SC_getCameraZoom();
+  settings.camera_zoom_max = SC_getCameraZoomMax();
   settings.horizontal_sensitivity = SC_getHorizontalSensitivity();
   settings.overall_speed = SC_getOverallSpeed();
   settings.camera_fov = SC_getCameraFov();
@@ -50,6 +51,14 @@ function SC_getCameraZoom(): float {
     theGame
     .GetInGameConfigWrapper()
     .GetVarValue('SCgeneral', 'SCcameraZoom')
+  );
+}
+
+function SC_getCameraZoomMax(): float {
+  return StringToFloat(
+    theGame
+    .GetInGameConfigWrapper()
+    .GetVarValue('SCgeneral', 'SCcameraZoomMax')
   );
 }
 

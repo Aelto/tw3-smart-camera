@@ -84,6 +84,7 @@ struct SC_settings {
   var is_enabled_with_mouse: bool;
 
   var camera_zoom: float;
+  var camera_zoom_max: float;
 
   /**
    * Multiplier control the horizontal sensitivity

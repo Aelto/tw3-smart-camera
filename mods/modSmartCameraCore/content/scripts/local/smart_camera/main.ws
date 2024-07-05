@@ -294,13 +294,18 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
         * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
 
       // y axis: horizontal position, front to back
-      4 
+      ClampF(
+        4 
         - player.smart_camera_data.settings.camera_zoom
         + back_offset + ((int)is_mean_position_too_high * -1)
 
         + ClampF(head_to_hand_offset.Y * -4, -0.5, 1)
         // this should only apply to the head_to_hand_offset
         * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
+
+        -player.smart_camera_data.settings.camera_zoom_max,
+        player.smart_camera_data.settings.camera_zoom_max
+      ),
 
       // z axis: vertical position, bottom to top
       player.smart_camera_data.settings.camera_height

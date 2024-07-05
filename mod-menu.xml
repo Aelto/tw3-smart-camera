@@ -9,6 +9,7 @@
         <Entry varId="SCmodEnabledOnBoat" value="1" />
         <Entry varId="SChorizontalSensitivity" value="1" />
         <Entry varId="SCcameraZoom" value="3.5" />
+        <Entry varId="SCcameraZoomMax" value="20" />
         <Entry varId="SCoverallSpeed" value="2" />
         <Entry varId="SCcameraFov" value="60" />
         <Entry varId="SCcameraHeight" value="0.8" />
@@ -24,11 +25,12 @@
         <Var id="SCmodEnabledOnBoat" displayName="sc_mod_enabled_boat" displayType="TOGGLE" />
         <Var id="SCmodEnabledWithMouse" displayName="sc_enabled_with_mouse" displayType="TOGGLE" />
         <Var id="SChorizontalSensitivity" displayName="sc_horizontal_sensitivity" displayType="SLIDER;0;10;100" />
-        <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />
         <Var id="SCcameraZoom" displayName="sc_camera_zoom" displayType="SLIDER;0;10;100" />
-        <Var id="SCcameraFov" displayName="sc_camera_fov" displayType="SLIDER;0;120;120" />
+        <Var id="SCcameraZoomMax" displayName="sc_camera_zoom_max" displayType="SLIDER;0;40;40" />
         <Var id="SCcameraHeight" displayName="sc_camera_height" displayType="SLIDER;0;10;100" />
         <Var id="SCcameraHorizontalPosition" displayName="sc_camera_horizontal_position" displayType="SLIDER;-10;10;100" />
+        <Var id="SCcameraFov" displayName="sc_camera_fov" displayType="SLIDER;0;120;120" />
+        <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />
         <Var id="SChorseCameraZoom" displayName="sc_horse_camera_zoom" displayType="SLIDER;0;2;100" />
         <Var id="SCexplorationAutoCenterEnabled" displayName="sc_exploration_auto_center" displayType="TOGGLE" />
     </VisibleVars>
