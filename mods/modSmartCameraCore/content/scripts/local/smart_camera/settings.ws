@@ -11,6 +11,7 @@ function SC_reloadSettings(out settings: SC_settings) {
   settings.overall_speed = SC_getOverallSpeed();
   settings.camera_fov = SC_getCameraFov();
   settings.camera_height = SC_getCameraHeight();
+  settings.camera_height_max = SC_getCameraHeightMax();
   settings.camera_horizontal_position = SC_getCameraHorizontalPosition();
   settings.horse_camera_zoom = SC_getHorseCameraZoom();
   settings.exploration_autocenter_enabled = SC_isExplorationAutocenterEnabled();
@@ -91,6 +92,14 @@ function SC_getCameraHeight(): float {
     theGame
     .GetInGameConfigWrapper()
     .GetVarValue('SCgeneral', 'SCcameraHeight')
+  );
+}
+
+function SC_getCameraHeightMax(): float {
+  return StringToFloat(
+    theGame
+    .GetInGameConfigWrapper()
+    .GetVarValue('SCgeneral', 'SCcameraHeightMax')
   );
 }
 

@@ -308,12 +308,16 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       ),
 
       // z axis: vertical position, bottom to top
-      player.smart_camera_data.settings.camera_height
+      ClampF(
+        player.smart_camera_data.settings.camera_height
         + ((int)is_mean_position_too_high * 0.2)
 
         + ClampF(head_to_hand_offset.Z * 0.5, -0.2, 0.2)
         // this should only apply to the head_to_hand_offset
-        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0)
+        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
+        -player.smart_camera_data.settings.camera_height_max,
+        player.smart_camera_data.settings.camera_height_max
+      )
     ),
     0.5f,
     delta * player.smart_camera_data.settings.overall_speed * 0.2 * player.smart_camera_data.combat_start_smoothing

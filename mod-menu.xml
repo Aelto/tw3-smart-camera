@@ -28,6 +28,7 @@
         <Var id="SCcameraZoom" displayName="sc_camera_zoom" displayType="SLIDER;0;10;100" />
         <Var id="SCcameraZoomMax" displayName="sc_camera_zoom_max" displayType="SLIDER;0;40;40" />
         <Var id="SCcameraHeight" displayName="sc_camera_height" displayType="SLIDER;0;10;100" />
+        <Var id="SCcameraHeightMax" displayName="sc_camera_height_max" displayType="SLIDER;0;10;100" />
         <Var id="SCcameraHorizontalPosition" displayName="sc_camera_horizontal_position" displayType="SLIDER;-10;10;100" />
         <Var id="SCcameraFov" displayName="sc_camera_fov" displayType="SLIDER;0;120;120" />
         <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />

@@ -118,8 +118,6 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
                       * (float)player.smart_camera_data.horse_auto_center_enabled
                       * player.smart_camera_data.settings.horse_camera_zoom;
 
-  LogChannel('SmartCamera', "horse_zoom_offset = " + horse_zoom_offset);
-
   moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset);
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
