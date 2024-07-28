@@ -83,7 +83,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   hostile_enemies = player.GetHostileEnemies();
   positions = SC_getEntitiesPositions(hostile_enemies);
   target = player.GetTarget();
-  target_position = target.GetWorldPosition();
+  target_position = target.GetWorldPosition() + Vector(0, 0, 0.5);
 
   mean_position = SC_getMeanPosition(positions, player);
   is_mean_position_too_high = mean_position.Z - player_position.Z > 3.5;
@@ -425,7 +425,7 @@ function SC_getEntitiesPositions(entities: array<CActor>): array<Vector> {
   output.Resize(size);
 
   for (i = 0; i < size; i += 1) {
-    output[i] =entities[i].GetWorldPosition();
+    output[i] = entities[i].GetWorldPosition() + Vector(0, 0, 0.5);
   }
 
   return output;
