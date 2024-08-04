@@ -13,7 +13,7 @@
 2115722011|        |option_sc_camera_zoom_max|<font color="b392f0">Combat:</font> Maximum camera distance
 2115722012|        |option_sc_camera_fov|<font color="b392f0">Combat:</font>Camera FOV
 2115722013|        |option_sc_camera_height|<font color="b392f0">Combat:</font> Camera height
-2115722014|        |option_sc_camera_height|<font color="b392f0">Combat:</font> Maximum camera height
+2115722014|        |option_sc_camera_height_max|<font color="b392f0">Combat:</font> Maximum camera height
 2115722015|        |option_sc_camera_horizontal_position|<font color="b392f0">Combat:</font> Camera horizontal position
 2115722016|        |option_sc_horizontal_sensitivity|<font color="b392f0">Combat:</font> Horizontal sensitivity
 2115722017|        |option_sc_overall_speed|<font color="b392f0">Combat:</font> Overall camera speed
