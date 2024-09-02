@@ -39,6 +39,11 @@ struct SC_data {
   var horse_auto_center_enabled: bool;
 
   /**
+   * a LERPed offset for the left to right position in exploration mode
+   */
+  var exploration_local_x_offset: float;
+
+  /**
    * Tracks the look_at position of the camera, it is used to LERP the
    * translations in order to avoid having a fast moving camera going from left
    * to right constantly.
@@ -57,6 +62,7 @@ struct SC_data {
    */
   var yaw_correction_cursor: float;
   var pitch_correction_cursor: float;
+  var feet_distance_cursor: float;
 
   var interaction_focus_cursor: float;
 
@@ -64,6 +70,12 @@ struct SC_data {
 
   var player_bone_index_rhand: int;
   default player_bone_index_rhand = -999;
+
+  var player_bone_index_lfoot: int;
+  default player_bone_index_lfoot = -999;
+
+  var player_bone_index_rfoot: int;
+  default player_bone_index_rfoot = -999;
 
   var player_bone_index_head: int;
   default player_bone_index_head = -999;
@@ -106,6 +118,7 @@ struct SC_settings {
   var horse_camera_zoom: float;
 
   var exploration_autocenter_enabled: bool;
+  var exploration_shake_intensity: float;
 }
 
 enum SC_cameraMode {

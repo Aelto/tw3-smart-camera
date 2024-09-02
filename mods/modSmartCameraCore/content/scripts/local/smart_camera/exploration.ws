@@ -3,6 +3,8 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   var player_velocity: Vector;
   var position_offset: Vector;
   var rotation: EulerAngles;
+  var feet_distance: float;
+  var feet_offset: Vector;
   var player_speed: float;
   var angle_distance: float;
   var camera: CCustomCamera;
@@ -27,16 +29,64 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   player.smart_camera_data.exploration_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.exploration_start_smoothing, 1);
   player.smart_camera_data.combat_start_smoothing = 0;
 
-  ////////////////////
-  // Yaw correction //
-  ///////////////////
-  //#region yaw correction
   SC_updateCursor(
     delta,
     player.smart_camera_data.yaw_correction_cursor,
     player_speed > 0
   );
 
+  //////////////////////
+  // Pitch correction //
+  //////////////////////
+  //#region pitch correction
+  if (player.smart_camera_data.settings.exploration_shake_intensity > 0) {
+
+    feet_offset = VecNormalize(
+      thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_lfoot)
+      - thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_rfoot)
+    );
+
+    feet_distance = VecDistance2D(
+      thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_lfoot),
+      thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_rfoot)
+    );
+
+    // the cursor goes up faster than it goes down. Over time this cursor will
+    // store the highest distance then slowly go back to lower values and quickly
+    // back to higher ones.
+    player.smart_camera_data.feet_distance_cursor = LerpF(
+      delta
+          * (
+            1
+            // 1 if current value is < than cursor, 0 if greater
+            - (float)(feet_distance < player.smart_camera_data.feet_distance_cursor)
+            * 0.7
+          ),
+      player.smart_camera_data.feet_distance_cursor,
+      feet_distance
+    );
+
+    moveData.pivotRotationValue.Pitch = LerpAngleF(
+      delta
+        * player.smart_camera_data.settings.overall_speed,
+
+      moveData.pivotRotationValue.Pitch,
+      moveData.pivotRotationValue.Pitch
+      + (feet_distance / player.smart_camera_data.feet_distance_cursor - 0.84)
+      // * (player.smart_camera_data.feet_distance_cursor / feet_distance)
+      * 0.25
+      * player_speed
+      * 2
+      * player.smart_camera_data.settings.exploration_shake_intensity
+    );
+  }
+
+  //#endregion pitch correction
+
+  ////////////////////
+  // Yaw correction //
+  ///////////////////
+  //#region yaw correction
   if (player.smart_camera_data.yaw_correction_cursor > 0) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       delta
@@ -105,6 +155,39 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   }
   //#endregion roll correction
+
+  // the value is lerped as it can quickly change when the player walks towards
+  // the camera and goes from left to right.
+  player.smart_camera_data.exploration_local_x_offset = LerpF(
+    delta,
+    player.smart_camera_data.exploration_local_x_offset,
+    // x axis: horizontal position, left to right
+    ClampF(angle_distance, -180, 180) * 0.005 * player_speed
+    + feet_offset.X
+    * (feet_distance / player.smart_camera_data.feet_distance_cursor - 0.84)
+    * 0.025
+    * player_speed
+  );
+
+  DampVectorSpring(
+    moveData.cameraLocalSpaceOffset,
+    moveData.cameraLocalSpaceOffsetVel,
+    Vector(
+      // x axis: horizontal position, left to right
+      player.smart_camera_data.exploration_local_x_offset,
+
+      // y axis: horizontal position, front to back
+      absolute_angle_distance * -0.01 * player_speed,
+
+      // z axis: vertical position, bottom to top
+      feet_offset.Y
+      * (feet_distance / player.smart_camera_data.feet_distance_cursor - 0.84)
+      * 0.025
+      * player_speed
+    ),
+    0.5f,
+    delta
+  );
 
   return false;
 }

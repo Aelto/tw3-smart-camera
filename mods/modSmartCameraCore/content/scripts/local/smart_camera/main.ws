@@ -21,6 +21,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     SC_reloadSettings(player.smart_camera_data.settings);
 
     player.smart_camera_data.player_bone_index_rhand = player.GetBoneIndex('r_hand');
+    player.smart_camera_data.player_bone_index_rfoot = player.GetBoneIndex('r_foot');
+    player.smart_camera_data.player_bone_index_lfoot = player.GetBoneIndex('l_foot');
     player.smart_camera_data.player_bone_index_head = player.GetBoneIndex('head');
   }
 
