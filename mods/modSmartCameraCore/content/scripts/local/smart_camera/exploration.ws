@@ -169,6 +169,13 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     * player_speed
   );
 
+  player.smart_camera_data.exploration_local_y_offset = LerpF(
+    delta,
+    player.smart_camera_data.exploration_local_y_offset,
+    // y axis: horizontal position, front to back
+    absolute_angle_distance * -0.01 * player_speed
+  );
+
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
     moveData.cameraLocalSpaceOffsetVel,
@@ -177,7 +184,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
       player.smart_camera_data.exploration_local_x_offset,
 
       // y axis: horizontal position, front to back
-      absolute_angle_distance * -0.01 * player_speed,
+      player.smart_camera_data.exploration_local_y_offset,
 
       // z axis: vertical position, bottom to top
       feet_offset.Y

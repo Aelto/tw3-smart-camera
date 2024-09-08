@@ -44,6 +44,11 @@ struct SC_data {
   var exploration_local_x_offset: float;
 
   /**
+   * a LERPed offset for the front to back position in exploration mode
+   */
+  var exploration_local_y_offset: float;
+
+  /**
    * Tracks the look_at position of the camera, it is used to LERP the
    * translations in order to avoid having a fast moving camera going from left
    * to right constantly.
