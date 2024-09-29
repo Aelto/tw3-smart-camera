@@ -49,6 +49,12 @@ struct SC_data {
   var exploration_local_y_offset: float;
 
   /**
+   * a cursor that is constantly LERPed towards 0 and that indicates recent
+   * sudden rotations
+   */
+  var exploration_rotation_tendency: float;
+
+  /**
    * Tracks the look_at position of the camera, it is used to LERP the
    * translations in order to avoid having a fast moving camera going from left
    * to right constantly.

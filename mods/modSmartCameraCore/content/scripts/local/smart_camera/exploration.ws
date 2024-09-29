@@ -35,6 +35,25 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     player_speed > 0
   );
 
+  // two LERPs, one that increases it quickly if the player is moving, the other
+  // that LERPs the tendency towards zero.
+  //
+  // The value is in the [-1;1] range
+  player.smart_camera_data.exploration_rotation_tendency = ClampF(
+    -1,
+    1,
+    LerpAngleF(
+      delta * player_speed,
+      player.smart_camera_data.exploration_rotation_tendency,
+      angle_distance / 180 * 5
+    )
+  );
+  player.smart_camera_data.exploration_rotation_tendency = LerpAngleF(
+    delta * 50,
+    player.smart_camera_data.exploration_rotation_tendency,
+    0
+  );
+
   //////////////////////
   // Pitch correction //
   //////////////////////
@@ -137,7 +156,14 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
         // we divide by the right axis values so that using the right stick
         // reduces the auto-center speed
         / (1 + AbsF(theInput.GetActionValue('GI_AxisRightX')) + AbsF(theInput.GetActionValue('GI_AxisRightY')))
-        + 0.05 * delta * player_speed
+
+        + delta
+        * player_speed
+        * (
+          LogF(AbsF(player.smart_camera_data.exploration_rotation_tendency) + 2)
+          * AbsF(player.smart_camera_data.exploration_rotation_tendency)
+          * 2
+        )
       )
       // the value of the cursor also controls the strength of the correction,
       // the cursor's value is also updated if the player is manually tweaking
@@ -147,34 +173,57 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
       // disables the autocenter the closer Geralt goes towards the camera.
       // For example when you do a 180 degrees turn the camera should not auto
       // center.
-      * MaxF(1 - AbsF(angle_distance) / 120, 0),
+      * MaxF(1 - absolute_angle_distance / 120, 0),
+
       moveData.pivotRotationValue.Yaw,
+
       player.GetHeading()
+      + (
+        angle_distance
+        * LogF(AbsF(player.smart_camera_data.exploration_rotation_tendency) + 2)
+        * AbsF(player.smart_camera_data.exploration_rotation_tendency)
+        * -5
+      )
     );
 
-    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+    // LogChannel('SC', player.smart_camera_data.exploration_rotation_tendency);
+
+    moveData.pivotRotationController.SetDesiredHeading(
+      moveData.pivotRotationValue.Yaw
+      + (
+        angle_distance
+        * LogF(AbsF(player.smart_camera_data.exploration_rotation_tendency) + 2)
+        * AbsF(player.smart_camera_data.exploration_rotation_tendency)
+        * -5
+      )
+    );
   }
   //#endregion roll correction
 
   // the value is lerped as it can quickly change when the player walks towards
   // the camera and goes from left to right.
-  player.smart_camera_data.exploration_local_x_offset = LerpF(
-    delta,
-    player.smart_camera_data.exploration_local_x_offset,
-    // x axis: horizontal position, left to right
-    ClampF(angle_distance, -180, 180) * 0.005 * player_speed
-    + feet_offset.X
-    * (feet_distance / player.smart_camera_data.feet_distance_cursor - 0.84)
-    * 0.025
-    * player_speed
-  );
+  if (player.smart_camera_data.settings.exploration_autocenter_enabled) {
+    player.smart_camera_data.exploration_local_x_offset = LerpF(
+      delta,
+      player.smart_camera_data.exploration_local_x_offset,
+      // x axis: horizontal position, left to right
+      ClampF(angle_distance, -60, 60)
+      * (1 - 180 / (absolute_angle_distance + 0.001))
 
-  player.smart_camera_data.exploration_local_y_offset = LerpF(
-    delta,
-    player.smart_camera_data.exploration_local_y_offset,
-    // y axis: horizontal position, front to back
-    absolute_angle_distance * -0.01 * player_speed
-  );
+
+      * 0.125
+      * player_speed
+      * AbsF(player.smart_camera_data.exploration_rotation_tendency)
+      * 1
+    );
+
+    player.smart_camera_data.exploration_local_y_offset = LerpF(
+      delta,
+      player.smart_camera_data.exploration_local_y_offset,
+      // y axis: horizontal position, front to back
+      absolute_angle_distance * -0.01 * player_speed
+    );
+  }
 
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
