@@ -16,6 +16,7 @@ function SC_reloadSettings(out settings: SC_settings) {
   settings.horse_camera_zoom = SC_getHorseCameraZoom();
   settings.exploration_autocenter_enabled = SC_isExplorationAutocenterEnabled();
   settings.exploration_shake_intensity = SC_getExplorationShakeIntensity();
+  settings.exploration_offset_intensity = SC_getExplorationOffsetIntensity();
 }
 
 function SC_isEnabledInCombat(): bool {
@@ -131,5 +132,13 @@ function SC_getExplorationShakeIntensity(): float {
     theGame
     .GetInGameConfigWrapper()
     .GetVarValue('SCgeneral', 'SCexplorationShakeIntensity')
+  );
+}
+
+function SC_getExplorationOffsetIntensity(): float {
+  return StringToFloat(
+    theGame
+    .GetInGameConfigWrapper()
+    .GetVarValue('SCgeneral', 'SCexplorationOffsetIntensity')
   );
 }

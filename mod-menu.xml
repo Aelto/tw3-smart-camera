@@ -36,6 +36,7 @@
         <Var id="SChorseCameraZoom" displayName="sc_horse_camera_zoom" displayType="SLIDER;0;2;100" />
         <Var id="SCexplorationAutoCenterEnabled" displayName="sc_exploration_auto_center" displayType="TOGGLE" />
         <Var id="SCexplorationShakeIntensity" displayName="sc_exploration_shake_intensity" displayType="SLIDER;0;2;100" />
+        <Var id="SCexplorationOffsetIntensity" displayName="sc_exploration_offset_intensity" displayType="SLIDER;0;2;100" />
     </VisibleVars>
   </Group>
 </UserConfig>

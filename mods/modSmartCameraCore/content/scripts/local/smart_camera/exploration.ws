@@ -207,12 +207,16 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
       delta,
       player.smart_camera_data.exploration_local_x_offset,
       // x axis: horizontal position, left to right
-      ClampF(angle_distance, -60, 60)
+      player.smart_camera_data.settings.exploration_offset_intensity
+      // the values were originally designed for a 2560 ultrawide,
+      // going down to 75% brings it to a 1920 regular screen. 
+      // Multiplying it again by 1.33 will bring it back to regular values
+      * 0.75
+      * ClampF(angle_distance, -60, 60)
       * (1 - 180 / (absolute_angle_distance + 0.001))
 
-
       * 0.125
-      * player_speed
+      * MinF(player_speed, 3.0)
       * AbsF(player.smart_camera_data.exploration_rotation_tendency)
       * 1
     );

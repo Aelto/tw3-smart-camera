@@ -130,6 +130,7 @@ struct SC_settings {
 
   var exploration_autocenter_enabled: bool;
   var exploration_shake_intensity: float;
+  var exploration_offset_intensity: float;
 }
 
 enum SC_cameraMode {
