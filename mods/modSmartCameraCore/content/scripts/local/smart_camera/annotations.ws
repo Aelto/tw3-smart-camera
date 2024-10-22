@@ -29,3 +29,27 @@ function SaveChangedSettings() {
     SC_reloadSettings(player.smart_camera_data.settings);
   }
 }
+
+
+// disable vanilla sprint camera if SC is enabled
+@wrapMethod(CPlayer)
+function EnableRunCamera( flag : bool ) {
+  if (!thePlayer.smart_camera_data.settings.is_enabled_in_exploration) {
+    wrappedMethod(flag);
+  }
+}
+
+@wrapMethod(CPlayer)
+function EnableSprintingCamera( flag : bool ) {
+  if (!thePlayer.smart_camera_data.settings.is_enabled_in_exploration) {
+    wrappedMethod(flag);
+  }
+}
+
+@wrapMethod(CR4Player)
+function EnableSprintingCamera( flag : bool ) {
+  if (!thePlayer.smart_camera_data.settings.is_enabled_in_exploration) {
+    wrappedMethod(flag);
+  }
+}
+
