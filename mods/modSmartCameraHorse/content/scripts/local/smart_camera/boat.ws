@@ -46,7 +46,10 @@ function SC_boatOnCameraTickPostTick(player: CR4Player, boat: CBoatComponent, ca
     moveData.pivotRotationValue.Roll = LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed,
       moveData.pivotRotationValue.Roll,
-      angle_distance * 0.3 * boat_speed
+      player.smart_camera_data.settings.horse_camera_tilt_intensity
+        * angle_distance
+        * 0.3
+        * boat_speed
     );
 
     // moveData.pivotRotationController.SetDesiredHeading(angle_distance * 0.1);
