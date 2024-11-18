@@ -14,6 +14,17 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     return false;
   }
 
+  // change the pivots only if there is something to do with the camera.
+  camera = theGame.GetGameCamera();
+  camera.ChangePivotDistanceController( 'Default' );
+  camera.ChangePivotRotationController( 'Exploration' );
+  camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
+  moveData.pivotRotationController = camera.GetActivePivotRotationController();
+  moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
+  moveData.pivotPositionController = camera.GetActivePivotPositionController();
+  moveData.pivotPositionController.SetDesiredPosition( thePlayer.GetWorldPosition() );
+  moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
+
   rotation = moveData.pivotRotationValue;
   angle_distance = AngleDistance(rotation.Yaw, player.GetHeading());
   absolute_angle_distance = AbsF(angle_distance);
@@ -135,17 +146,6 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     if (theInput.GetActionValue('GI_AxisRightX') + theInput.GetActionValue('GI_AxisRightY') != 0) {
       player.smart_camera_data.yaw_correction_cursor = -2;
     }
-
-    // change the pivots only if there is something to do with the camera.
-    camera = theGame.GetGameCamera();
-    camera.ChangePivotDistanceController( 'Default' );
-    camera.ChangePivotRotationController( 'Exploration' );
-    camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
-    moveData.pivotRotationController = camera.GetActivePivotRotationController();
-    moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
-    moveData.pivotPositionController = camera.GetActivePivotPositionController();
-    moveData.pivotPositionController.SetDesiredPosition( thePlayer.GetWorldPosition() );
-    moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
     
     moveData.pivotRotationValue.Yaw = LerpAngleF(
       (
