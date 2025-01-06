@@ -122,6 +122,9 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
                       * player.smart_camera_data.settings.horse_camera_zoom;
 
   moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset);
+  moveData.pivotPositionController.SetDesiredPosition(
+    horse.GetEntity().GetWorldPosition()
+  );
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
     moveData.cameraLocalSpaceOffsetVel,
