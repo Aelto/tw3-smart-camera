@@ -4,7 +4,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var is_mean_position_too_high: bool;
   var rotation_to_target: EulerAngles;
   var hostile_enemies: array<CActor>;
-  var head_to_hand_offset: Vector;
   var lower_pitch_amount: float;
   var positions: array<Vector>;
   var player_position: Vector;
@@ -20,10 +19,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     player.smart_camera_data.time_before_settings_fetch = 10;
     SC_reloadSettings(player.smart_camera_data.settings);
 
-    player.smart_camera_data.player_bone_index_rhand = player.GetBoneIndex('r_hand');
     player.smart_camera_data.player_bone_index_rfoot = player.GetBoneIndex('r_foot');
     player.smart_camera_data.player_bone_index_lfoot = player.GetBoneIndex('l_foot');
-    player.smart_camera_data.player_bone_index_head = player.GetBoneIndex('head');
   }
 
   /////////////////////
@@ -120,9 +117,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     mean_position,
     player
   );
-
-  head_to_hand_offset = thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_rhand)
-                      - thePlayer.GetBoneWorldPositionByIndex(player.smart_camera_data.player_bone_index_head);
 
   player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
     * delta
