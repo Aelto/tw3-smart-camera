@@ -14,7 +14,7 @@ function SC_reloadSettings(out settings: SC_settings) {
   settings.camera_height_max = SC_getCameraHeightMax();
   settings.camera_horizontal_position = SC_getCameraHorizontalPosition();
   settings.horse_camera_zoom = SC_getHorseCameraZoom();
-  settings.horse_camera_tilt_intensity = SC_getHorseCameraTiltIntensity();
+  settings.camera_tilt_intensity = SC_getHorseCameraTiltIntensity();
   settings.exploration_autocenter_enabled = SC_isExplorationAutocenterEnabled();
   settings.exploration_shake_intensity = SC_getExplorationShakeIntensity();
   settings.exploration_offset_intensity = SC_getExplorationOffsetIntensity();
@@ -126,7 +126,7 @@ function SC_getHorseCameraTiltIntensity(): float {
   return StringToFloat(
     theGame
     .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SChorseCameraTiltIntensity')
+    .GetVarValue('SCgeneral', 'SCcameraTiltIntensity')
   );
 }
 

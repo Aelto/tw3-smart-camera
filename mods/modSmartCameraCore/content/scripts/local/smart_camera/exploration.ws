@@ -198,6 +198,17 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
       )
     );
   }
+  //#endregion Yaw correction
+
+  ////////////////////
+  // Roll correction //
+  ///////////////////
+  //#region roll correction
+  moveData.pivotRotationValue.Roll = LerpAngleF(
+    delta * player.smart_camera_data.settings.overall_speed,
+    moveData.pivotRotationValue.Roll,
+    0
+  );
   //#endregion roll correction
 
   // the value is lerped as it can quickly change when the player walks towards

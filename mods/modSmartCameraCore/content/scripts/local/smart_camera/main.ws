@@ -287,7 +287,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   moveData.pivotRotationValue.Roll = LerpAngleF(
     delta * player.smart_camera_data.settings.overall_speed,
     moveData.pivotRotationValue.Roll,
-    player.smart_camera_data.settings.horse_camera_tilt_intensity
+    player.smart_camera_data.settings.camera_tilt_intensity
       * AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw)
       * 0.03
   );
@@ -312,24 +312,13 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.cameraLocalSpaceOffsetVel,
     Vector(
       // x axis: horizontal position, left to right
-      player.smart_camera_data.settings.camera_horizontal_position
-
-        // the number in the multiplication controls the intensity
-        // the numbers in the clamp control the maximum distance
-        + ClampF(head_to_hand_offset.X * -7, -1.5, 1.5)
-        // this should only apply to the head_to_hand_offset:
-        // tone down the offset the further the camera is from the player's heading
-        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
+      player.smart_camera_data.settings.camera_horizontal_position,
 
       // y axis: horizontal position, front to back
       ClampF(
         4 
         - player.smart_camera_data.settings.camera_zoom
-        + back_offset + ((int)is_mean_position_too_high * -1)
-
-        + ClampF(head_to_hand_offset.Y * -4, -0.5, 1)
-        // this should only apply to the head_to_hand_offset
-        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
+        + back_offset + ((int)is_mean_position_too_high * -1),
 
         -player.smart_camera_data.settings.camera_zoom_max,
         player.smart_camera_data.settings.camera_zoom_max
@@ -338,11 +327,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       // z axis: vertical position, bottom to top
       ClampF(
         player.smart_camera_data.settings.camera_height
-        + ((int)is_mean_position_too_high * 0.2)
-
-        + ClampF(head_to_hand_offset.Z * 0.5, -0.2, 0.2)
-        // this should only apply to the head_to_hand_offset
-        * ClampF(1 - player_to_camera_heading_distance / 180.0, 0.0, 1.0),
+        + ((int)is_mean_position_too_high * 0.2),
         -player.smart_camera_data.settings.camera_height_max,
         player.smart_camera_data.settings.camera_height_max
       )
