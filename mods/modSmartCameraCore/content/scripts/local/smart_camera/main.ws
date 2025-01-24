@@ -8,7 +8,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   var lower_pitch_amount: float;
   var positions: array<Vector>;
   var player_position: Vector;
-  var target_position: Vector;
   var player_heading: float;
   var mean_position: Vector;
   var rotation: EulerAngles;
@@ -86,7 +85,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   hostile_enemies = player.GetHostileEnemies();
   positions = SC_getEntitiesPositions(hostile_enemies);
   target = player.GetTarget();
-  target_position = target.GetWorldPosition() + Vector(0, 0, 0.5);
 
   mean_position = SC_getMeanPosition(positions, player);
   is_mean_position_too_high = mean_position.Z - player_position.Z > 3.5;
@@ -137,7 +135,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   ///////////////////
   //#region yaw correction
   player.smart_camera_data.camera_disable_cursor = SC_updateCursor(
-    delta * 0.5,
+    delta * 0.25,
     player.smart_camera_data.camera_disable_cursor,
     player.GetIsSprinting()
   );
