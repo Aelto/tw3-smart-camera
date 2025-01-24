@@ -282,6 +282,19 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
   //#endregion pitch correction
 
+  ////////////////////
+  // Roll correction //
+  ///////////////////
+  //#region roll correction
+  moveData.pivotRotationValue.Roll = LerpAngleF(
+    delta * player.smart_camera_data.settings.overall_speed,
+    moveData.pivotRotationValue.Roll,
+    player.smart_camera_data.settings.horse_camera_tilt_intensity
+      * AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw)
+      * 0.03
+  );
+  //#endregion roll correction
+
   /////////////////////
   // Zoom correction //
   /////////////////////
