@@ -83,7 +83,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   positions = SC_getEntitiesPositions(hostile_enemies);
   target = player.GetTarget();
 
-  mean_position = SC_getMeanPosition(positions, player);
+  mean_position = SC_getMeanPosition(positions, player) + Vector(0.0, 0.0, 1.0);
   is_mean_position_too_high = mean_position.Z - player_position.Z > 3.5;
 
   // LERP the mean position to smooth out the movements
@@ -213,7 +213,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   else if (
     // !player.IsInCombatAction() &&
     // only if the camera is not already looking down
-    moveData.pivotRotationValue.Pitch > rotation_to_target.Pitch - 10 &&
+    moveData.pivotRotationValue.Pitch > rotation_to_target.Pitch - 30 &&
     SC_shouldLowerPitch(player, positions, lower_pitch_amount)
   ) {
 
@@ -224,7 +224,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       );
 
       moveData.pivotRotationController.SetDesiredPitch(
-        rotation_to_target.Pitch - 10 * lower_pitch_amount
+        rotation_to_target.Pitch - 30 * lower_pitch_amount
       );
       moveData.pivotRotationValue.Pitch	= LerpAngleF(
         delta
@@ -232,7 +232,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
           * player.smart_camera_data.combat_start_smoothing
           * MaxF(player.smart_camera_data.pitch_correction_cursor, 0),
         moveData.pivotRotationValue.Pitch,
-        rotation_to_target.Pitch - 10 * lower_pitch_amount
+        rotation_to_target.Pitch - 30 * lower_pitch_amount
       );
 
   }
@@ -283,7 +283,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.pivotRotationValue.Roll,
     player.smart_camera_data.settings.camera_tilt_intensity
       * AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw)
-      * 0.03
+      * 0.05
   );
   //#endregion roll correction
 
@@ -312,7 +312,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       ClampF(
         4 
         - player.smart_camera_data.settings.camera_zoom
-        + back_offset + ((int)is_mean_position_too_high * -1),
+        + back_offset + ((int)is_mean_position_too_high * -1)
+        + lower_pitch_amount * 0.5,
 
         -player.smart_camera_data.settings.camera_zoom_max,
         player.smart_camera_data.settings.camera_zoom_max
@@ -321,7 +322,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       // z axis: vertical position, bottom to top
       ClampF(
         player.smart_camera_data.settings.camera_height
-        + ((int)is_mean_position_too_high * 0.2),
+        + ((int)is_mean_position_too_high * 0.2)
+        + lower_pitch_amount * 0.5,
         -player.smart_camera_data.settings.camera_height_max,
         player.smart_camera_data.settings.camera_height_max
       )
@@ -365,7 +367,7 @@ function SC_shouldLowerPitch(
     }
 
     // target has the high ground!
-    if (target_position.Z >= player_position.Z + 1.0) {
+    if (target_position.Z >= player_position.Z + 0.2) {
       continue;
     }
 
@@ -401,7 +403,15 @@ function SC_shouldLowerPitch(
     }
   }
 
-  return lower_pitch_amount_local > 0.0;
+  // finally, the more targets there are the less intense it is:
+  if (lower_pitch_amount_local > 0.0) {
+    lower_pitch_amount = MaxF(0, lower_pitch_amount - 0.1 * positions.Size());
+
+    return true;
+  }
+
+  lower_pitch_amount = 0.0;
+  return false;
 }
 
 function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position: Vector, positions: array<Vector>): float {
@@ -484,7 +494,7 @@ function SC_getEntitiesPositions(entities: array<CActor>): array<Vector> {
   output.Resize(size);
 
   for (i = 0; i < size; i += 1) {
-    output[i] = entities[i].GetWorldPosition() + Vector(0, 0, 0.5);
+    output[i] = entities[i].GetWorldPosition();
   }
 
   return output;
