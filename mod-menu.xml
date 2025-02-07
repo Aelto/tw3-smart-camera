@@ -10,13 +10,20 @@
         <Entry varId="SChorizontalSensitivity" value="1" />
         <Entry varId="SCcameraZoom" value="3.5" />
         <Entry varId="SCcameraZoomMax" value="20" />
-        <Entry varId="SCoverallSpeed" value="2" />
+        <Entry varId="SCoverallSpeed" value="1" />
         <Entry varId="SCcameraFov" value="60" />
         <Entry varId="SCcameraHeight" value="0.8" />
+        <Entry varId="SCcameraHeightMax" value="5.0" />
         <Entry varId="SChorseCameraZoom" value="1" />
         <Entry varId="SCcameraTiltIntensity" value="1" />
         <Entry varId="SCexplorationAutoCenterEnabled" value="1" />
         <Entry varId="SCexplorationShakeIntensity" value="1" />
+        <Entry varId="SCexplorationOffsetIntensity" value="1" />
+      </Preset>
+
+      <Preset id="0" displayName="sc_subtle" >
+        <Entry varId="SCoverallSpeed" value="0.2" />
+        <Entry varId="SCexplorationShakeIntensity" value="0.5" />
         <Entry varId="SCexplorationOffsetIntensity" value="1" />
       </Preset>
     </PresetsArray>
