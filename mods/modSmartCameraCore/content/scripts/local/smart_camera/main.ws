@@ -2,7 +2,6 @@
 function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
   var player_to_camera_heading_distance: float;
   var is_mean_position_too_high: bool;
-  var rotation_to_target: EulerAngles;
   var hostile_enemies: array<CActor>;
   var lower_pitch_amount: float;
   var positions: array<Vector>;
@@ -57,6 +56,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   player.smart_camera_data.previous_camera_mode = SCCM_Exploration;
 
   if (!player.IsInCombat()) {
+    player.smart_camera_data.combat_look_at_position.X = 0;
+    player.smart_camera_data.combat_look_at_position.Y = 0;
+
     return SC_onGameCameraTick_outOfCombat(player, moveData, delta);
   }
 
@@ -80,43 +82,75 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
 
   hostile_enemies = player.GetHostileEnemies();
-  positions = SC_getEntitiesPositions(hostile_enemies);
+  SC_getEntitiesPositions(hostile_enemies, positions);
   target = player.GetTarget();
 
-  mean_position = SC_getMeanPosition(positions, player) + Vector(0.0, 0.0, 1.0);
+  mean_position = SC_getMeanPosition(positions, player) + Vector(0.0, 0.0, -1.0);
   is_mean_position_too_high = mean_position.Z - player_position.Z > 3.5;
 
   // LERP the mean position to smooth out the movements
-  if (
-    player.smart_camera_data.combat_look_at_position.X == 0
-    && player.smart_camera_data.combat_look_at_position.Y == 0
-  ) {
-    player.smart_camera_data.combat_look_at_position = mean_position;
+  if (hostile_enemies.Size() > 0) {
+    if (
+      player.smart_camera_data.combat_look_at_position.X == 0
+      && player.smart_camera_data.combat_look_at_position.Y == 0
+    ) {
+      player.smart_camera_data.combat_look_at_position = mean_position;
+    }
+    else {
+      player.smart_camera_data.combat_look_at_position.X = LerpF(
+        delta * player.smart_camera_data.settings.overall_speed,
+        player.smart_camera_data.combat_look_at_position.X,
+        mean_position.X
+      );
+  
+      player.smart_camera_data.combat_look_at_position.Y = LerpF(
+        delta * player.smart_camera_data.settings.overall_speed,
+        player.smart_camera_data.combat_look_at_position.Y,
+        mean_position.Y
+      );
+  
+      player.smart_camera_data.combat_look_at_position.Z = LerpF(
+        delta * player.smart_camera_data.settings.overall_speed,
+        player.smart_camera_data.combat_look_at_position.Z,
+        mean_position.Z
+      );
+    }
+  }
+
+  mean_position = player.smart_camera_data.combat_look_at_position;
+
+  if (SC_shouldLowerPitch(player, positions, lower_pitch_amount)) {
+    // lower the position so the camera looks down
+    mean_position.Z -= 1.5 * lower_pitch_amount;
+
+    SC_updateCursor(
+      delta,
+      player.smart_camera_data.pitch_correction_cursor,
+      true
+    );
+  }
+  else if (player.smart_camera_data.combat_start_smoothing < 1 && positions.Size() > 0) {
+    mean_position.Z -= 1;
+
+    SC_updateCursor(
+      delta,
+      player.smart_camera_data.pitch_correction_cursor,
+      true
+    );
   }
   else {
-    player.smart_camera_data.combat_look_at_position.X = LerpF(
-      delta * (player.smart_camera_data.settings.overall_speed * 0.5),
-      player.smart_camera_data.combat_look_at_position.X,
-      mean_position.X
-    );
-
-    player.smart_camera_data.combat_look_at_position.Y = LerpF(
-      delta * (player.smart_camera_data.settings.overall_speed * 0.5),
-      player.smart_camera_data.combat_look_at_position.Y,
-      mean_position.Y
-    );
-
-    player.smart_camera_data.combat_look_at_position.Z = LerpF(
-      delta * (player.smart_camera_data.settings.overall_speed * 0.5),
-      player.smart_camera_data.combat_look_at_position.Z,
-      mean_position.Z
+    SC_updateCursor(
+      // the slighly slower decrease means the camera will always take a few
+      // extra milliseconds to aim back at the mean_position before stopping
+      // all corrections
+      delta * 0.8,
+      player.smart_camera_data.pitch_correction_cursor,
+      false
     );
   }
 
-  rotation = SC_getRotationToLookAtPosition(
-    mean_position,
-    player
-  );
+  rotation = VecToRotation(mean_position - theCamera.GetCameraPosition());
+  rotation.Pitch *= -1;
 
   player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
     * delta
@@ -174,103 +208,23 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // Pitch correction //
   //////////////////////
   //#region pitch correction
-  rotation_to_target = VecToRotation(mean_position - player_position);
-
-
   // some pitch correction if the mean position is too high compared to the
   // player, which means the target is probably off camera.
   if (thePlayer.IsCameraLockedToTarget()) {
-    moveData.pivotRotationController.SetDesiredPitch( rotation_to_target.Pitch - 15 );
+    moveData.pivotRotationController.SetDesiredPitch( rotation.Pitch - 15 );
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
       moveData.pivotRotationValue.Pitch,
-      rotation_to_target.Pitch - 15
+      rotation.Pitch - 15
     );
-  }
-  else if (is_mean_position_too_high) {
-    SC_updateCursor(
-      delta,
-      player.smart_camera_data.pitch_correction_cursor,
-      true
-    );
-
-    rotation.Pitch = LerpAngleF(
-      0.2,
-      moveData.pivotRotationValue.Pitch,
-      rotation.Pitch
-    );
-
-    moveData.pivotRotationController.SetDesiredPitch( rotation.Pitch );
-    moveData.pivotRotationValue.Pitch	= LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
-      moveData.pivotRotationValue.Pitch,
-      -rotation.Pitch
-    );
-  }
-  // do pitch correction if the target is blocked by Geralt, but only if the 
-  // pitch is not lower than the current one.
-  // As pitch goes down, camera looks further down.
-  else if (
-    // !player.IsInCombatAction() &&
-    // only if the camera is not already looking down
-    moveData.pivotRotationValue.Pitch > rotation_to_target.Pitch - 30 &&
-    SC_shouldLowerPitch(player, positions, lower_pitch_amount)
-  ) {
-
-      SC_updateCursor(
-        delta * lower_pitch_amount,
-        player.smart_camera_data.pitch_correction_cursor,
-        true
-      );
-
-      moveData.pivotRotationController.SetDesiredPitch(
-        rotation_to_target.Pitch - 30 * lower_pitch_amount
-      );
-      moveData.pivotRotationValue.Pitch	= LerpAngleF(
-        delta
-          * player.smart_camera_data.settings.overall_speed
-          * player.smart_camera_data.combat_start_smoothing
-          * MaxF(player.smart_camera_data.pitch_correction_cursor, 0),
-        moveData.pivotRotationValue.Pitch,
-        rotation_to_target.Pitch - 30 * lower_pitch_amount
-      );
-
   }
   else if (player.smart_camera_data.pitch_correction_cursor > 0) {
-    SC_updateCursor(
-      delta,
-      player.smart_camera_data.pitch_correction_cursor,
-      false
-    );
-
-    moveData.pivotRotationController.SetDesiredPitch( player.smart_camera_data.desired_y_direction );
+    moveData.pivotRotationController.SetDesiredPitch(rotation.Pitch);
     moveData.pivotRotationValue.Pitch	= LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed,
       moveData.pivotRotationValue.Pitch,
-      player.smart_camera_data.desired_y_direction
+      MaxF(rotation.Pitch, -30)
     );
-  }
-  // during the first few seconds where the start_smoothing is still below 1,
-  // lowers the pitch of the camera so that it looks towards the ground.
-  else if (player.smart_camera_data.combat_start_smoothing < 1 && positions.Size() > 0) {
-    moveData.pivotRotationController.SetDesiredPitch( rotation_to_target.Pitch - 15 );
-    moveData.pivotRotationValue.Pitch	= LerpAngleF(
-      delta
-        * player.smart_camera_data.settings.overall_speed
-        * player.smart_camera_data.combat_start_smoothing
-        * 0.5,
-      moveData.pivotRotationValue.Pitch,
-      rotation_to_target.Pitch - 15
-    );
-  }
-  else {
-    SC_updateCursor(
-      delta,
-      player.smart_camera_data.pitch_correction_cursor,
-      false
-    );
-
-    player.smart_camera_data.desired_y_direction = moveData.pivotRotationValue.Pitch;
   }
   //#endregion pitch correction
 
@@ -283,7 +237,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     moveData.pivotRotationValue.Roll,
     player.smart_camera_data.settings.camera_tilt_intensity
       * AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw)
-      * 0.05
+      * 0.03
   );
   //#endregion roll correction
 
@@ -312,8 +266,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       ClampF(
         4 
         - player.smart_camera_data.settings.camera_zoom
-        + back_offset + ((int)is_mean_position_too_high * -1)
-        + lower_pitch_amount * 0.5,
+        + back_offset + ((int)is_mean_position_too_high * -1),
 
         -player.smart_camera_data.settings.camera_zoom_max,
         player.smart_camera_data.settings.camera_zoom_max
@@ -323,7 +276,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       ClampF(
         player.smart_camera_data.settings.camera_height
         + ((int)is_mean_position_too_high * 0.2)
-        + lower_pitch_amount * 0.5,
+        + lower_pitch_amount * 1.5 * player.smart_camera_data.pitch_correction_cursor,
         -player.smart_camera_data.settings.camera_height_max,
         player.smart_camera_data.settings.camera_height_max
       )
@@ -396,6 +349,10 @@ function SC_shouldLowerPitch(
       // this means the multiplication will almost always decrease the intensity
       lower_pitch_amount_local *= (100 - distance_angle) / 100;
 
+      // use ^2 to make the curve somewhat exponential with an increase near
+      // the end.
+      lower_pitch_amount_local *= lower_pitch_amount_local;
+
       // take the highest value possible from all targets.
       if (lower_pitch_amount_local > lower_pitch_amount) {
         lower_pitch_amount = lower_pitch_amount_local;
@@ -403,9 +360,10 @@ function SC_shouldLowerPitch(
     }
   }
 
-  // finally, the more targets there are the less intense it is:
   if (lower_pitch_amount_local > 0.0) {
-    lower_pitch_amount = MaxF(0, lower_pitch_amount - 0.1 * positions.Size());
+    // finally, the more targets there are the less intense it is:
+    // i == positions.Size() here since the loop is over
+    lower_pitch_amount = MaxF(0, lower_pitch_amount - 0.1 * i);
 
     return true;
   }
@@ -481,23 +439,16 @@ function SC_getMeanPosition(positions: array<Vector>, player: CR4Player): Vector
   return mean_position;
 }
 
-function SC_getRotationToLookAtPosition(mean_position: Vector, player: CR4Player): EulerAngles {
-  return VecToRotation(mean_position - player.GetWorldPosition());
-}
-
-function SC_getEntitiesPositions(entities: array<CActor>): array<Vector> {
-  var output: array<Vector>;
+function SC_getEntitiesPositions(entities: array<CActor>, out positions: array<Vector>) {
   var size: int;
   var i: int;
 
   size = entities.Size();
-  output.Resize(size);
+  positions.Resize(size);
 
   for (i = 0; i < size; i += 1) {
-    output[i] = entities[i].GetWorldPosition();
+    positions[i] = entities[i].GetWorldPosition();
   }
-
-  return output;
 }
 
 function SC_getClosestPosition(origin: Vector, positions: array<Vector>): Vector {
