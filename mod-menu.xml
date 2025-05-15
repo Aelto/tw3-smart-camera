@@ -22,6 +22,22 @@
       </Preset>
 
       <Preset id="0" displayName="sc_subtle" >
+        <!-- values from the default preset -->
+        <Entry varId="SCmodEnabledInCombat" value="1" />
+        <Entry varId="SCmodEnabledInExploration" value="1" />
+        <Entry varId="SCmodEnabledOnHorse" value="1" />
+        <Entry varId="SCmodEnabledOnBoat" value="1" />
+        <Entry varId="SChorizontalSensitivity" value="1" />
+        <Entry varId="SCcameraZoom" value="3.5" />
+        <Entry varId="SCcameraZoomMax" value="20" />
+        <Entry varId="SCcameraFov" value="60" />
+        <Entry varId="SCcameraHeight" value="0.8" />
+        <Entry varId="SCcameraHeightMax" value="5.0" />
+        <Entry varId="SChorseCameraZoom" value="1" />
+        <Entry varId="SCcameraTiltIntensity" value="1" />
+        <Entry varId="SCexplorationAutoCenterEnabled" value="1" />
+
+        <!-- changed values -->
         <Entry varId="SCoverallSpeed" value="0.2" />
         <Entry varId="SCexplorationShakeIntensity" value="0.5" />
         <Entry varId="SCexplorationOffsetIntensity" value="1" />
@@ -34,19 +50,29 @@
         <Var id="SCmodEnabledOnHorse" displayName="sc_mod_enabled_horse" displayType="TOGGLE" />
         <Var id="SCmodEnabledOnBoat" displayName="sc_mod_enabled_boat" displayType="TOGGLE" />
         <Var id="SCmodEnabledWithMouse" displayName="sc_enabled_with_mouse" displayType="TOGGLE" />
-        <Var id="SChorizontalSensitivity" displayName="sc_horizontal_sensitivity" displayType="SLIDER;0;10;100" />
-        <Var id="SCcameraZoom" displayName="sc_camera_zoom" displayType="SLIDER;0;10;100" />
-        <Var id="SCcameraZoomMax" displayName="sc_camera_zoom_max" displayType="SLIDER;0;40;40" />
-        <Var id="SCcameraHeight" displayName="sc_camera_height" displayType="SLIDER;0;10;100" />
-        <Var id="SCcameraHeightMax" displayName="sc_camera_height_max" displayType="SLIDER;0;10;100" />
-        <Var id="SCcameraHorizontalPosition" displayName="sc_camera_horizontal_position" displayType="SLIDER;-10;10;100" />
-        <Var id="SCcameraFov" displayName="sc_camera_fov" displayType="SLIDER;0;120;120" />
+
+        <Var id="SeparatorGlobal" displayName="sc_global" displayType="SEPARATOR" tags="customDisplayName" />
         <Var id="SCoverallSpeed" displayName="sc_overall_speed" displayType="SLIDER;0;10;100" />
+        <Var id="SCcameraTiltIntensity" displayName="sc_camera_tilt" displayType="SLIDER;0;1;100" />
+        <Var id="SCcameraFov" displayName="sc_camera_fov" displayType="SLIDER;0;120;120" />
+
+        <Var id="SeparatorCombat" displayName="sc_combat" displayType="SEPARATOR" tags="customDisplayName" />
+        <Var id="SCcameraHorizontalPosition" displayName="sc_camera_horizontal_position" displayType="SLIDER;-10;10;100" />
+        <Var id="SChorizontalSensitivity" displayName="sc_horizontal_sensitivity" displayType="SLIDER;0;10;100" />
+        <Var id="SCcameraHeight" displayName="sc_camera_height" displayType="SLIDER;0;10;100" />
+          <Var id="SCcameraHeightMax" displayName="sc_camera_height_max" displayType="SLIDER;0;10;100" tags="indent" />
+        <Var id="SCcameraZoom" displayName="sc_camera_zoom" displayType="SLIDER;0;10;100" />
+          <Var id="SCcameraZoomMax" displayName="sc_camera_zoom_max" displayType="SLIDER;0;40;40" tags="indent" />
+        
+
+        <Var id="SeparatorHorse" displayName="sc_horse" displayType="SEPARATOR" tags="customDisplayName" />
         <Var id="SChorseCameraZoom" displayName="sc_horse_camera_zoom" displayType="SLIDER;0;2;100" />
+
+        <Var id="SeparatorExploration" displayName="sc_exploration" displayType="SEPARATOR" tags="customDisplayName" />
         <Var id="SCexplorationAutoCenterEnabled" displayName="sc_exploration_auto_center" displayType="TOGGLE" />
         <Var id="SCexplorationShakeIntensity" displayName="sc_exploration_shake_intensity" displayType="SLIDER;0;2;100" />
         <Var id="SCexplorationOffsetIntensity" displayName="sc_exploration_offset_intensity" displayType="SLIDER;0;2;100" />
-        <Var id="SCcameraTiltIntensity" displayName="sc_camera_tilt" displayType="SLIDER;0;1;100" />
+
     </VisibleVars>
   </Group>
 </UserConfig>

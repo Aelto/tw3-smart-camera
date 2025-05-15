@@ -2,25 +2,43 @@
 ; id      |key(hex)|key(str)| text
 2115722001|        |panel_sc_name|Smart Camera
 2115722002|        |panel_combat_sc_name|Smart Camera
+;
+; presets
 2115722003|        |preset_Mods_sc_name|Smart Camera
 2115722004|        |preset_Mods_combat_sc_name|Smart Camera
 2115722005|        |preset_value_sc_defaults|Defaults
-2115722006|        |option_sc_mod_enabled_combat|<font color="#30a14e">MOD ENABLED IN COMBAT</font>
-2115722007|        |option_sc_mod_enabled_exploration|<font color="#30a14e">MOD ENABLED IN EXPLORATION</font>
-2115722008|        |option_sc_mod_enabled_horse|<font color="#30a14e">MOD ENABLED ON HORSE</font>
-2115722009|        |option_sc_enabled_with_mouse|<font color="#30a14e">MOD ENABLED WITH MOUSE</font>
-2115722010|        |option_sc_camera_zoom|<font color="b392f0">Combat:</font> camera distance
-2115722011|        |option_sc_camera_zoom_max|<font color="b392f0">Combat:</font> maximum camera distance
-2115722012|        |option_sc_camera_fov|<font color="b392f0">Combat:</font> camera FOV
-2115722013|        |option_sc_camera_height|<font color="b392f0">Combat:</font> camera height
-2115722014|        |option_sc_camera_height_max|<font color="b392f0">Combat:</font> maximum camera height
-2115722015|        |option_sc_camera_horizontal_position|<font color="b392f0">Combat:</font> camera horizontal position
-2115722016|        |option_sc_horizontal_sensitivity|<font color="b392f0">Combat:</font> horizontal sensitivity
-2115722017|        |option_sc_overall_speed|<font color="b392f0">Combat:</font> overall camera speed
-2115722018|        |option_sc_horse_camera_zoom|<font color="#9a6700">Horse:</font> camera distance
-2115722019|        |option_sc_exploration_auto_center|<font color="9e9e9e">Exploration:</font> smart auto center
-2115722020|        |option_sc_mod_enabled_boat|<font color="#30a14e">MOD ENABLED ON BOAT</font>
-2115722021|        |option_sc_exploration_shake_intensity|<font color="9e9e9e">Exploration:</font> shake intensity
-2115722022|        |option_sc_exploration_offset_intensity|<font color="9e9e9e">Exploration:</font> left/right offset amount
-2115722023|        |option_sc_camera_tilt|<font color="#e1e1e1">Global:</font> camera tilt intensity
-2115722024|        |preset_value_sc_subtle|Subtle
+2115722006|        |preset_value_sc_subtle|Subtle
+;
+; enable toggles
+2115722007|        |option_sc_mod_enabled_combat|<font color="#30a14e">MOD ENABLED IN COMBAT</font>
+2115722008|        |option_sc_mod_enabled_exploration|<font color="#30a14e">MOD ENABLED IN EXPLORATION</font>
+2115722009|        |option_sc_mod_enabled_horse|<font color="#30a14e">MOD ENABLED ON HORSE</font>
+2115722010|        |option_sc_enabled_with_mouse|<font color="#30a14e">MOD ENABLED WITH MOUSE</font>
+2115722011|        |option_sc_mod_enabled_boat|<font color="#30a14e">MOD ENABLED ON BOAT</font>
+;
+; combat settings
+2115722012|        |option_sc_camera_zoom|Camera distance
+2115722013|        |option_sc_camera_zoom_max|Maximum camera distance
+2115722014|        |option_sc_camera_height|Camera height
+2115722015|        |option_sc_camera_height_max|Maximum camera height
+2115722016|        |option_sc_camera_horizontal_position|Camera horizontal position
+2115722017|        |option_sc_horizontal_sensitivity|Horizontal sensitivity
+;
+; horse settings
+2115722018|        |option_sc_horse_camera_zoom|Camera distance
+;
+; exploration settings
+2115722019|        |option_sc_exploration_auto_center|Smart auto center
+2115722020|        |option_sc_exploration_shake_intensity|Shake intensity
+2115722021|        |option_sc_exploration_offset_intensity|Left/right offset amount
+;
+; global settings
+2115722022|        |option_sc_camera_tilt|Camera tilt intensity
+2115722023|        |option_sc_camera_fov|Camera FOV
+2115722024|        |option_sc_overall_speed|Overall camera speed
+;
+; separators / sections
+2115722025|        |sc_global|Global settings
+2115722026|        |sc_combat|Combat
+2115722027|        |sc_exploration|Exploration
+2115722028|        |sc_horse|Horse
