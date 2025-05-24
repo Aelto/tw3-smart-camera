@@ -21,7 +21,7 @@
         <Entry varId="SCexplorationOffsetIntensity" value="1" />
       </Preset>
 
-      <Preset id="0" displayName="sc_subtle" >
+      <Preset id="1" displayName="sc_subtle" >
         <!-- values from the default preset -->
         <Entry varId="SCmodEnabledInCombat" value="1" />
         <Entry varId="SCmodEnabledInExploration" value="1" />
@@ -36,11 +36,11 @@
         <Entry varId="SChorseCameraZoom" value="1" />
         <Entry varId="SCcameraTiltIntensity" value="1" />
         <Entry varId="SCexplorationAutoCenterEnabled" value="1" />
+        <Entry varId="SCexplorationOffsetIntensity" value="1" />
 
         <!-- changed values -->
         <Entry varId="SCoverallSpeed" value="0.2" />
         <Entry varId="SCexplorationShakeIntensity" value="0.5" />
-        <Entry varId="SCexplorationOffsetIntensity" value="1" />
       </Preset>
     </PresetsArray>
 
