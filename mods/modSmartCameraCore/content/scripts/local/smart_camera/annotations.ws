@@ -1,3 +1,6 @@
+@addField(CR4Player)
+var smart_camera_data: SC_data;
+
 @wrapMethod(CR4Player)
 function OnGameCameraTick(out moveData : SCameraMovementData, dt : float) {
   var res: bool;
@@ -33,23 +36,32 @@ function SaveChangedSettings() {
 
 // disable vanilla sprint camera if SC is enabled
 @wrapMethod(CPlayer)
-function EnableRunCamera( flag : bool ) {
+function EnableRunCamera(flag: bool) {
   if (!thePlayer.smart_camera_data.settings.is_enabled_in_exploration) {
     wrappedMethod(flag);
   }
 }
 
 @wrapMethod(CPlayer)
-function EnableSprintingCamera( flag : bool ) {
+function EnableSprintingCamera(flag: bool) {
   if (!thePlayer.smart_camera_data.settings.is_enabled_in_exploration) {
     wrappedMethod(flag);
   }
 }
 
 @wrapMethod(CR4Player)
-function EnableSprintingCamera( flag : bool ) {
+function EnableSprintingCamera(flag: bool) {
   if (!thePlayer.smart_camera_data.settings.is_enabled_in_exploration) {
     wrappedMethod(flag);
   }
 }
 
+
+@wrapMethod(Combat)
+function OnGameCameraPostTick(out moveData: SCameraMovementData, dt: float ) {
+  if (SC_shouldDisableExplorationPosTick(parent)) {
+    return true;
+  }
+
+  return wrappedMethod(moveData, dt);
+}

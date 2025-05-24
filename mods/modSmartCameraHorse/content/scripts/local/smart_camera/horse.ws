@@ -49,6 +49,9 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   if (angle_distance * angle_distance < (4 + horse_speed) * (4 + horse_speed)) {
     player.smart_camera_data.horse_auto_center_enabled = true;
   }
+  else if (!theInput.LastUsedGamepad()) {
+    player.smart_camera_data.horse_auto_center_enabled = false;
+  }
 
   if (theInput.GetActionValue('GI_AxisRightX') != 0) {
     player.smart_camera_data.horse_auto_center_enabled = false;
