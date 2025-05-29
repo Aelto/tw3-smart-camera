@@ -14,7 +14,11 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   player.smart_camera_data.time_before_settings_fetch -= delta;
   if (player.smart_camera_data.time_before_settings_fetch <= 0) {
     player.smart_camera_data.time_before_settings_fetch = 10;
-    SC_reloadSettings(player.smart_camera_data.settings);
+
+    if (!player.smart_camera_data.settings_fetched) {
+      player.smart_camera_data.settings_fetched = true;
+      SC_reloadSettings(player.smart_camera_data.settings);
+    }
 
     player.smart_camera_data.player_bone_index_rfoot = player.GetBoneIndex('r_foot');
     player.smart_camera_data.player_bone_index_lfoot = player.GetBoneIndex('l_foot');
@@ -79,7 +83,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // 3 seconds 
   player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
 
-  target_data = player.SC_computeCombatTargetData(player_position);
+  target_data = player.SC_computeCombatTargetData(player_position, delta);
   target = player.GetTarget();
 
   is_mean_position_too_high = target_data.mean_position.Z - player_position.Z > 3.5;
@@ -210,9 +214,6 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // Zoom correction //
   /////////////////////
   //#region zoom correction
-
-  // offset coming from the creatures behind the Camera's back.
-  back_offset = SC_getHeightOffsetFromTargetsInBack(player, player_position, positions);
   //#endregion zoom correction
 
   player_to_camera_heading_distance = AngleDistance(

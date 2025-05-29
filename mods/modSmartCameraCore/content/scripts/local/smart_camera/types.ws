@@ -2,6 +2,16 @@
 struct SC_data {
 
   /**
+   * Whether the settings were fetched already
+   */
+  var settings_fetched: float;
+
+  /**
+   * The time before settings are updated, in seconds
+   */
+  var time_before_bone_fetch: float;
+
+  /**
    * Set to the previously run camera mode
    */
   var previous_camera_mode: SC_cameraMode;
@@ -11,11 +21,6 @@ struct SC_data {
    * stores the desired direction on the X axis.
    */
   var desired_x_direction: float;
-
-  /**
-   * The time before settings are updated, in seconds
-   */
-  var time_before_settings_fetch: float;
 
   /**
    * The cached settings data

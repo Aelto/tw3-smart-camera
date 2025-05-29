@@ -14,7 +14,8 @@ struct SC_CombatTargetData {
 
 @addMethod(CR4Player)
 function SC_computeCombatTargetData(
-  player_position: Vector
+  player_position: Vector,
+  delta: float
 ): SC_CombatTargetData {
   var output: SC_CombatTargetData;
 
