@@ -372,7 +372,11 @@ function SC_shouldLowerPitch(
   return false;
 }
 
-function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position: Vector, positions: array<Vector>): float {
+function SC_getHeightOffsetFromTargetsInBack(
+  player: CR4Player,
+  player_position: Vector,
+  out positions: array<Vector>
+): float {
   var entities_count_in_back: float;
   var player_back_heading: float;
   var camera_position: Vector;
@@ -416,7 +420,10 @@ function SC_getHeightOffsetFromTargetsInBack(player: CR4Player, player_position:
   );
 }
 
-function SC_getMeanPosition(positions: array<Vector>, player: CR4Player): Vector {
+function SC_getMeanPosition(
+  out positions: array<Vector>,
+  player: CR4Player
+): Vector {
   var mean_position: Vector;
   var i: int;
 
