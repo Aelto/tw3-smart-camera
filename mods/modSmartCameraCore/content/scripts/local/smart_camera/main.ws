@@ -2,16 +2,14 @@
 function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
   var player_to_camera_heading_distance: float;
   var is_mean_position_too_high: bool;
-  var hostile_enemies: array<CActor>;
-  var lower_pitch_amount: float;
-  var positions: array<Vector>;
   var player_position: Vector;
   var player_heading: float;
-  var mean_position: Vector;
   var rotation: EulerAngles;
   var camera: CCustomCamera;
   var back_offset: float;
   var target: CActor;
+
+  var target_data: SC_CombatTargetData;
 
   player.smart_camera_data.time_before_settings_fetch -= delta;
   if (player.smart_camera_data.time_before_settings_fetch <= 0) {
@@ -81,47 +79,14 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // 3 seconds 
   player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
 
-  hostile_enemies = player.GetHostileEnemies();
-  SC_getEntitiesPositions(hostile_enemies, positions);
+  target_data = player.SC_computeCombatTargetData(player_position);
   target = player.GetTarget();
 
-  mean_position = SC_getMeanPosition(positions, player) + Vector(0.0, 0.0, -1.0);
-  is_mean_position_too_high = mean_position.Z - player_position.Z > 3.5;
+  is_mean_position_too_high = target_data.mean_position.Z - player_position.Z > 3.5;
 
-  // LERP the mean position to smooth out the movements
-  if (hostile_enemies.Size() > 0) {
-    if (
-      player.smart_camera_data.combat_look_at_position.X == 0
-      && player.smart_camera_data.combat_look_at_position.Y == 0
-    ) {
-      player.smart_camera_data.combat_look_at_position = mean_position;
-    }
-    else {
-      player.smart_camera_data.combat_look_at_position.X = LerpF(
-        delta * player.smart_camera_data.settings.overall_speed,
-        player.smart_camera_data.combat_look_at_position.X,
-        mean_position.X
-      );
-  
-      player.smart_camera_data.combat_look_at_position.Y = LerpF(
-        delta * player.smart_camera_data.settings.overall_speed,
-        player.smart_camera_data.combat_look_at_position.Y,
-        mean_position.Y
-      );
-  
-      player.smart_camera_data.combat_look_at_position.Z = LerpF(
-        delta * player.smart_camera_data.settings.overall_speed,
-        player.smart_camera_data.combat_look_at_position.Z,
-        mean_position.Z
-      );
-    }
-  }
-
-  mean_position = player.smart_camera_data.combat_look_at_position;
-
-  if (SC_shouldLowerPitch(player, positions, lower_pitch_amount)) {
+  if (target_data.should_lower_pitch) {
     // lower the position so the camera looks down
-    mean_position.Z -= 1.5 * lower_pitch_amount;
+    target_data.mean_position.Z -= 1.5 * target_data.lower_pitch_amount;
 
     SC_updateCursor(
       delta,
@@ -129,8 +94,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       true
     );
   }
-  else if (player.smart_camera_data.combat_start_smoothing < 1 && positions.Size() > 0) {
-    mean_position.Z -= 1;
+  else if (player.smart_camera_data.combat_start_smoothing < 1 && target_data.hostile_enemies_count > 0) {
+    target_data.mean_position.Z -= 1;
 
     SC_updateCursor(
       delta,
@@ -149,7 +114,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     );
   }
 
-  rotation = VecToRotation(mean_position - theCamera.GetCameraPosition());
+  rotation = VecToRotation(target_data.mean_position - theCamera.GetCameraPosition());
   rotation.Pitch *= -1;
 
   player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
@@ -174,7 +139,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
 
   if (player.smart_camera_data.camera_disable_cursor < 0) {
-    if (hostile_enemies.Size() > 0) {
+    if (target_data.hostile_enemies_count > 0) {
       moveData.pivotRotationValue.Yaw = LerpAngleF(
         delta
           * player.smart_camera_data.settings.overall_speed
@@ -266,7 +231,8 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       ClampF(
         4 
         - player.smart_camera_data.settings.camera_zoom
-        + back_offset + ((int)is_mean_position_too_high * -1),
+        + target_data.offset_from_targets_in_back
+        + ((int)is_mean_position_too_high * -1),
 
         -player.smart_camera_data.settings.camera_zoom_max,
         player.smart_camera_data.settings.camera_zoom_max
@@ -276,7 +242,7 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       ClampF(
         player.smart_camera_data.settings.camera_height
         + ((int)is_mean_position_too_high * 0.2)
-        + lower_pitch_amount * 1.5 * player.smart_camera_data.pitch_correction_cursor,
+        + target_data.lower_pitch_amount * 1.5 * player.smart_camera_data.pitch_correction_cursor,
         -player.smart_camera_data.settings.camera_height_max,
         player.smart_camera_data.settings.camera_height_max
       )
