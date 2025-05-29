@@ -11,9 +11,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
 
   var target_data: SC_CombatTargetData;
 
-  player.smart_camera_data.time_before_settings_fetch -= delta;
-  if (player.smart_camera_data.time_before_settings_fetch <= 0) {
-    player.smart_camera_data.time_before_settings_fetch = 10;
+  player.smart_camera_data.time_before_bone_fetch -= delta;
+  if (player.smart_camera_data.time_before_bone_fetch <= 0) {
+    player.smart_camera_data.time_before_bone_fetch = 10;
 
     if (!player.smart_camera_data.settings_fetched) {
       player.smart_camera_data.settings_fetched = true;

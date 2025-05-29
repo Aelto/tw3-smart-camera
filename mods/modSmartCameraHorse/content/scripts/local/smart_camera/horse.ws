@@ -10,9 +10,9 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     return false;
   }
 
-  player.smart_camera_data.time_before_settings_fetch -= delta;
-  if (player.smart_camera_data.time_before_settings_fetch <= 0 || player.smart_camera_data.horse_bone_index_pelvis < -999 || player.smart_camera_data.previous_camera_mode != SCCM_Horse) {
-    player.smart_camera_data.time_before_settings_fetch = 10;
+  player.smart_camera_data.time_before_bone_fetch -= delta;
+  if (player.smart_camera_data.time_before_bone_fetch <= 0 || player.smart_camera_data.horse_bone_index_pelvis < -999 || player.smart_camera_data.previous_camera_mode != SCCM_Horse) {
+    player.smart_camera_data.time_before_bone_fetch = 10;
     
     if (!player.smart_camera_data.settings_fetched) {
       player.smart_camera_data.settings_fetched = true;

@@ -4,7 +4,7 @@ struct SC_data {
   /**
    * Whether the settings were fetched already
    */
-  var settings_fetched: float;
+  var settings_fetched: bool;
 
   /**
    * The time before settings are updated, in seconds
