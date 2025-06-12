@@ -139,7 +139,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     Vector(
       // x axis: horizontal position, left to right
       // we place the camera based on the horse's head position.
-      pelvis_torso_angle.Yaw * 0.002,
+      0,
 
       // y axis: horizontal position, front to back
       horse_zoom_offset,
