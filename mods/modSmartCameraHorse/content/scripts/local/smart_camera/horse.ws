@@ -72,7 +72,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     );
 
     moveData.pivotRotationValue.Pitch = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 3) + 0.01),
+      delta * 2.0 * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 3) + 0.01),
       moveData.pivotRotationValue.Pitch,
       pelvis_torso_angle.Pitch - 15
     );
@@ -104,7 +104,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
       moveData.pivotRotationValue.Roll,
       player.smart_camera_data.settings.camera_tilt_intensity
         * angle_distance
-        * 0.03
+        * 0.06
         * horse_speed
     );
 
@@ -124,14 +124,15 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
                       // the + makes the camera go closer to the horse during angles
                       + MinF(absolute_angle_distance, 90)
                       * horse_speed
-                      * 0.002
+                      * 0.004
                       * (float)player.smart_camera_data.horse_auto_center_enabled
                       * player.smart_camera_data.settings.horse_camera_zoom;
 
-  moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset);
+  moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset + 0.5);
   moveData.pivotPositionController.SetDesiredPosition(
     horse.GetEntity().GetWorldPosition()
   );
+
   DampVectorSpring(
     moveData.cameraLocalSpaceOffset,
     moveData.cameraLocalSpaceOffsetVel,
