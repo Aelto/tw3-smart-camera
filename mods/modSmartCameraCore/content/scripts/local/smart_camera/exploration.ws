@@ -7,6 +7,7 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   var feet_offset: Vector;
   var player_speed: float;
   var angle_distance: float;
+  var rotation_tendency_curved: float;
   var camera: CCustomCamera;
 
 
@@ -51,19 +52,22 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   //
   // The value is in the [-1;1] range
   player.smart_camera_data.exploration_rotation_tendency = ClampF(
-    -1,
+    0,
     1,
     LerpAngleF(
-      delta * player_speed,
+      delta * player_speed * player_speed,
       player.smart_camera_data.exploration_rotation_tendency,
-      angle_distance / 180 * 5
+      absolute_angle_distance / 120
     )
   );
   player.smart_camera_data.exploration_rotation_tendency = LerpAngleF(
-    delta * 50,
+    delta * 25,
     player.smart_camera_data.exploration_rotation_tendency,
     0
   );
+
+  rotation_tendency_curved = LogF(AbsF(player.smart_camera_data.exploration_rotation_tendency) + 2)
+                           * AbsF(player.smart_camera_data.exploration_rotation_tendency);
 
   //////////////////////
   // Pitch correction //
@@ -116,26 +120,6 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
   ////////////////////
   // Yaw correction //
   ///////////////////
-  //#region yaw correction
-  if (player.smart_camera_data.yaw_correction_cursor > 0) {
-    moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta
-        * player.smart_camera_data.settings.overall_speed
-        * player.smart_camera_data.exploration_start_smoothing
-        * player.smart_camera_data.yaw_correction_cursor
-        * 1.5
-        / MaxF(player_speed, 1.0),
-      moveData.pivotRotationValue.Yaw,
-      rotation.Yaw
-    );
-
-    moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
-  }
-  //#endregion yaw correction
-
-  ////////////////////
-  // Yaw correction //
-  ///////////////////
   //#region Yaw correction
   // when the player turns around, moves the camera if the player heading is
   // different than the camera heading. But only after a 90 degrees difference.
@@ -148,23 +132,10 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     }
     
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      (
-        delta
-        * MaxF(AbsF(angle_distance) / 90 - 0.3, 0)
-        * player_speed
-        * 0.25
-        // we divide by the right axis values so that using the right stick
-        // reduces the auto-center speed
-        / (1 + AbsF(theInput.GetActionValue('GI_AxisRightX')) + AbsF(theInput.GetActionValue('GI_AxisRightY')))
-
-        + delta
-        * player_speed
-        * (
-          LogF(AbsF(player.smart_camera_data.exploration_rotation_tendency) + 2)
-          * AbsF(player.smart_camera_data.exploration_rotation_tendency)
-          * 2
-        )
-      )
+      delta
+      * player_speed
+      // * player_speed // squared value on purpose
+      * (1 + rotation_tendency_curved * 0.5)
       // the value of the cursor also controls the strength of the correction,
       // the cursor's value is also updated if the player is manually tweaking
       // the camera.
@@ -173,31 +144,29 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
       // disables the autocenter the closer Geralt goes towards the camera.
       // For example when you do a 180 degrees turn the camera should not auto
       // center.
-      * MaxF(1 - absolute_angle_distance / 120, 0),
+      //
+      // the -0.15 adds a 10% dead angle where the camera doesn't move when in
+      // the center.
+      * MaxF(absolute_angle_distance / 120 - 0.15, 0)
+      // then the opposite, reaches 0 when the camera is at max angle
+      * MaxF(1 - absolute_angle_distance / 120 - 0.1, 0),
+      
 
       moveData.pivotRotationValue.Yaw,
 
       player.GetHeading()
-      + (
-        angle_distance
-        * LogF(AbsF(player.smart_camera_data.exploration_rotation_tendency) + 2)
-        * AbsF(player.smart_camera_data.exploration_rotation_tendency)
-        * -5
-      )
+      // + (
+      //   angle_distance
+      //   * rotation_tendency_curved
+      //   * -5
+      // )
     );
 
     // LogChannel('SC', player.smart_camera_data.exploration_rotation_tendency);
 
-    moveData.pivotRotationController.SetDesiredHeading(
-      moveData.pivotRotationValue.Yaw
-      + (
-        angle_distance
-        * LogF(AbsF(player.smart_camera_data.exploration_rotation_tendency) + 2)
-        * AbsF(player.smart_camera_data.exploration_rotation_tendency)
-        * -5
-      )
-    );
   }
+
+  moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
   //#endregion Yaw correction
 
   ////////////////////
@@ -218,25 +187,24 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
       delta,
       player.smart_camera_data.exploration_local_x_offset,
       // x axis: horizontal position, left to right
-      player.smart_camera_data.settings.exploration_offset_intensity
       // the values were originally designed for a 2560 ultrawide,
       // going down to 75% brings it to a 1920 regular screen. 
       // Multiplying it again by 1.33 will bring it back to regular values
-      * 0.75
+      0.75
       * ClampF(angle_distance, -60, 60)
       * (1 - 180 / (absolute_angle_distance + 0.001))
 
       * 0.125
       * MinF(player_speed, 3.0)
       * AbsF(player.smart_camera_data.exploration_rotation_tendency)
-      * 1
+      * 0.5
     );
 
     player.smart_camera_data.exploration_local_y_offset = LerpF(
       delta,
       player.smart_camera_data.exploration_local_y_offset,
       // y axis: horizontal position, front to back
-      absolute_angle_distance * -0.01 * player_speed
+      absolute_angle_distance * -0.005 * player_speed
     );
   }
 
@@ -245,10 +213,13 @@ function SC_onGameCameraTick_outOfCombat(player: CR4Player, out moveData: SCamer
     moveData.cameraLocalSpaceOffsetVel,
     Vector(
       // x axis: horizontal position, left to right
-      player.smart_camera_data.exploration_local_x_offset,
+      player.smart_camera_data.exploration_local_x_offset
+        * player.smart_camera_data.settings.exploration_offset_intensity,
 
       // y axis: horizontal position, front to back
-      player.smart_camera_data.exploration_local_y_offset,
+      player.smart_camera_data.exploration_local_y_offset
+        // cannot go higher than 1, otherwise the camera goes way too far
+        * MinF(1.0, player.smart_camera_data.settings.exploration_offset_intensity),
 
       // z axis: vertical position, bottom to top
       feet_offset.Y
