@@ -1,4 +1,8 @@
 .scripts
 notes.md
 release
+release.bundled
 release.zip
+redkit/*
+log.txt
+wcc.log
