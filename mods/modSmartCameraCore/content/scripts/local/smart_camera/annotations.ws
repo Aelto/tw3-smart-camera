@@ -57,7 +57,7 @@ function EnableSprintingCamera(flag: bool) {
 }
 
 
-@wrapMethod(Combat)
+@wrapMethod(CR4PlayerStateCombat)
 function OnGameCameraPostTick(out moveData: SCameraMovementData, dt: float ) {
   if (SC_shouldDisableExplorationPosTick(parent)) {
     return true;
