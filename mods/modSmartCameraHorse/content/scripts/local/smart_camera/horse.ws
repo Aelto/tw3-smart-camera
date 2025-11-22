@@ -8,8 +8,8 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   var horse_effects_speed: float;
   var horse_effects_speed_inverted: float;
 
-  horse_effects_speed = 0.5;
-  horse_effects_speed_inverted = 1.0 / 0.5;
+  horse_effects_speed = 1.0;
+  horse_effects_speed_inverted = 2.0;
 
   if (!player.smart_camera_data.settings.is_enabled_on_horse) {
     return false;

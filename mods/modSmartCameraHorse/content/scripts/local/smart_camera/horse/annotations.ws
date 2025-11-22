@@ -1,4 +1,4 @@
-@wrapMethod(CR4PlayerStateHorseRiding)
+@wrapMethod(HorseRiding)
 function OnGameCameraPostTick(
   out moveData: SCameraMovementData,
   dt: float
@@ -16,7 +16,7 @@ function OnGameCameraPostTick(
   return wrappedMethod(moveData, dt);
 }
 
-@wrapMethod(CR4PlayerStateHorseRiding)
+@wrapMethod(HorseRiding)
 function OnGameCameraTick(out moveData: SCameraMovementData, dt: float ) {
   if (false) {
     wrappedMethod(moveData, dt);

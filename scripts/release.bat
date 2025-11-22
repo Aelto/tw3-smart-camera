@@ -27,7 +27,11 @@ copy "%modpath%\mod-menu.xml" "%modpath%\release\%binfolder%\%modname%.xml" /y
 mkdir "%bundleddir%\%binfolder%\"
 copy "%modpath%\mod-menu.xml" "%bundleddir%\%binfolder%\%modname%.xml" /y
 
-@REM call compileblob.bat
+call compileblob.bat
+call :createnomenurelease
+
+copy "%modpath%\mods\modSmartCameraCore\content\info.json" "%modpath%\release.bundled\mods\modSmartCamera\content\info.json" /y
+copy "%modpath%\mods\modSmartCameraCore\content\info.json" "%modpath%\release.no-menu\mods\modSmartCamera\content\info.json" /y
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::::::FUNCTIONS::::::::::::::::::::::::::::::::::::::
@@ -54,4 +58,14 @@ goto:eof
   ::echo "%releasemods%\%~1\%localpath%"
   ::echo "%bundledout%"
   XCOPY "%releasemods%\%~1\content\scripts\" "%bundledout%\"  /e /s /y
+goto:eof
+
+:createnomenurelease
+  rmdir "%modpath%\release.no-menu" /s /q
+  mkdir "%modpath%\release.no-menu"
+
+  XCOPY "%modpath%\release.bundled\mods" "%modpath%\release.no-menu\mods\" /e /s /y
+
+  del "%modpath%\release.no-menu\mods\modSmartCamera\content\*.w3strings"
+  del "%modpath%\release.no-menu\mods\modSmartCamera\content\*.csv"
 goto:eof
