@@ -5,6 +5,11 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   var horse_zoom_offset: float;
   var absolute_angle_distance: float;
   var pelvis_torso_angle: EulerAngles;
+  var horse_effects_speed: float;
+  var horse_effects_speed_inverted: float;
+
+  horse_effects_speed = 0.5;
+  horse_effects_speed_inverted = 1.0 / 0.5;
 
   if (!player.smart_camera_data.settings.is_enabled_on_horse) {
     return false;
@@ -52,6 +57,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
 
   if (angle_distance * angle_distance < (4 + horse_speed) * (4 + horse_speed)) {
     player.smart_camera_data.horse_auto_center_enabled = true;
+    theGame.ActivateHorseCamera(true, 0.f, true);
   }
   else if (!theInput.LastUsedGamepad()) {
     player.smart_camera_data.horse_auto_center_enabled = false;
@@ -72,7 +78,10 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     );
 
     moveData.pivotRotationValue.Pitch = LerpAngleF(
-      delta * 2.0 * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 3) + 0.01),
+      delta
+        * 2.0
+        * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 3) + 0.01)
+        * horse_effects_speed,
       moveData.pivotRotationValue.Pitch,
       pelvis_torso_angle.Pitch - 15
     );
@@ -85,7 +94,11 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   //#region yaw correction
   if (player.smart_camera_data.camera_disable_cursor < 0 && horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
     moveData.pivotRotationValue.Yaw = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed * horse_speed * 0.5 * absolute_angle_distance * 0.03,
+      delta
+        * player.smart_camera_data.settings.overall_speed
+        * horse_speed * 0.5
+        * absolute_angle_distance * 0.03
+        * horse_effects_speed,
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
     );
@@ -100,7 +113,9 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   //#region roll correction
   if (horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
     moveData.pivotRotationValue.Roll = LerpAngleF(
-      delta * player.smart_camera_data.settings.overall_speed,
+      delta
+        * player.smart_camera_data.settings.overall_speed
+        * horse_effects_speed,
       moveData.pivotRotationValue.Roll,
       player.smart_camera_data.settings.camera_tilt_intensity
         * angle_distance
