@@ -1,6 +1,7 @@
 .scripts
 notes.md
 release
+release.no-menu
 release.bundled
 release.zip
 redkit/*
