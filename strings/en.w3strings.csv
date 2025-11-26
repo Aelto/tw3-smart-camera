@@ -26,19 +26,20 @@
 ;
 ; horse settings
 2115722018|        |option_sc_horse_camera_zoom|Camera distance
+2115722019|        |option_sc_horse_autocenter_speed|Auto center speed
 ;
 ; exploration settings
-2115722019|        |option_sc_exploration_auto_center|Smart auto center
-2115722020|        |option_sc_exploration_shake_intensity|Shake intensity
-2115722021|        |option_sc_exploration_offset_intensity|Left/right offset amount
+2115722020|        |option_sc_exploration_auto_center|Smart auto center
+2115722021|        |option_sc_exploration_shake_intensity|Shake intensity
+2115722022|        |option_sc_exploration_offset_intensity|Left/right offset amount
 ;
 ; global settings
-2115722022|        |option_sc_camera_tilt|Camera tilt intensity
-2115722023|        |option_sc_camera_fov|Camera FOV
-2115722024|        |option_sc_overall_speed|Overall camera speed
+2115722023|        |option_sc_camera_tilt|Camera tilt intensity
+2115722024|        |option_sc_camera_fov|Camera FOV
+2115722025|        |option_sc_overall_speed|Overall camera speed
 ;
 ; separators / sections
-2115722025|        |sc_global|Global settings
-2115722026|        |sc_combat|Combat
-2115722027|        |sc_exploration|Exploration
-2115722028|        |sc_horse|Horse
+2115722026|        |sc_global|Global settings
+2115722027|        |sc_combat|Combat
+2115722028|        |sc_exploration|Exploration
+2115722029|        |sc_horse|Horse
