@@ -15,6 +15,7 @@
         <Entry varId="SCcameraHeight" value="0.8" />
         <Entry varId="SCcameraHeightMax" value="5.0" />
         <Entry varId="SChorseCameraZoom" value="1" />
+        <Entry varId="SChorseAutocenterSpeed" value="1" />
         <Entry varId="SCcameraTiltIntensity" value="1" />
         <Entry varId="SCexplorationAutoCenterEnabled" value="1" />
         <Entry varId="SCexplorationShakeIntensity" value="1" />
@@ -67,6 +68,7 @@
 
         <Var id="SeparatorHorse" displayName="sc_horse" displayType="SEPARATOR" tags="customDisplayName" />
         <Var id="SChorseCameraZoom" displayName="sc_horse_camera_zoom" displayType="SLIDER;0;2;100" />
+        <Var id="SChorseAutocenterSpeed" displayName="sc_horse_autocenter_speed" displayType="SLIDER;0;2;100" />
 
         <Var id="SeparatorExploration" displayName="sc_exploration" displayType="SEPARATOR" tags="customDisplayName" />
         <Var id="SCexplorationAutoCenterEnabled" displayName="sc_exploration_auto_center" displayType="TOGGLE" />

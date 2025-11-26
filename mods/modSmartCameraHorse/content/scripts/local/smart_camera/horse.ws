@@ -5,11 +5,6 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   var horse_zoom_offset: float;
   var absolute_angle_distance: float;
   var pelvis_torso_angle: EulerAngles;
-  var horse_effects_speed: float;
-  var horse_effects_speed_inverted: float;
-
-  horse_effects_speed = 1.0;
-  horse_effects_speed_inverted = 2.0;
 
   if (!player.smart_camera_data.settings.is_enabled_on_horse) {
     return false;
@@ -57,7 +52,9 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
 
   if (angle_distance * angle_distance < (4 + horse_speed) * (4 + horse_speed)) {
     player.smart_camera_data.horse_auto_center_enabled = true;
-    theGame.ActivateHorseCamera(true, 0.f, true);
+    // crashes the game, but it's supposed to solve the off camera when loading
+    // while on horse back.
+    // theGame.ActivateHorseCamera(true, 0.f, true);
   }
   else if (!theInput.LastUsedGamepad()) {
     player.smart_camera_data.horse_auto_center_enabled = false;
@@ -80,8 +77,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
     moveData.pivotRotationValue.Pitch = LerpAngleF(
       delta
         * 2.0
-        * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 3) + 0.01)
-        * horse_effects_speed,
+        * player.smart_camera_data.settings.overall_speed / (MaxF(horse_speed, 3) + 0.01),
       moveData.pivotRotationValue.Pitch,
       pelvis_torso_angle.Pitch - 15
     );
@@ -98,7 +94,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
         * player.smart_camera_data.settings.overall_speed
         * horse_speed * 0.5
         * absolute_angle_distance * 0.03
-        * horse_effects_speed,
+        * player.smart_camera_data.settings.horse_autocenter_speed,
       moveData.pivotRotationValue.Yaw,
       rotation.Yaw
     );
@@ -114,16 +110,12 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   if (horse_speed > 0 && player.smart_camera_data.horse_auto_center_enabled) {
     moveData.pivotRotationValue.Roll = LerpAngleF(
       delta
-        * player.smart_camera_data.settings.overall_speed
-        * horse_effects_speed,
+        * player.smart_camera_data.settings.overall_speed,
       moveData.pivotRotationValue.Roll,
       player.smart_camera_data.settings.camera_tilt_intensity
         * angle_distance
         * 0.06
-        * horse_speed
     );
-
-    // moveData.pivotRotationController.SetDesiredHeading(angle_distance * 0.1);
   }
   //#endregion roll correction
 

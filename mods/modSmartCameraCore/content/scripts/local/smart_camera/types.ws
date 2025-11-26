@@ -126,6 +126,7 @@ struct SC_settings {
   var camera_horizontal_position: float;
 
   var horse_camera_zoom: float;
+  var horse_autocenter_speed: float;
   var camera_tilt_intensity: float;
 
   var exploration_autocenter_enabled: bool;
