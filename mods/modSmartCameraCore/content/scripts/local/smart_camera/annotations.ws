@@ -56,12 +56,18 @@ function EnableSprintingCamera(flag: bool) {
   }
 }
 
+// This wrapper was once used, but now removed as it
+// can conflict with mods having a Combat state.
+// The removal of this wrapper does not seem to 
+// change anything either, which is odd.
+//
+// leaving it commented in case it causes issues
 
-@wrapMethod(Combat)
-function OnGameCameraPostTick(out moveData: SCameraMovementData, dt: float) {
-  if (SC_shouldDisableExplorationPosTick(parent)) {
-    return true;
-  }
+// @wrapMethod(Combat)
+// function OnGameCameraPostTick(out moveData: SCameraMovementData, dt: float) {
+//   if (SC_shouldDisableExplorationPosTick(parent)) {
+//     return true;
+//   }
 
-  return wrappedMethod(moveData, dt);
-}
+//   return wrappedMethod(moveData, dt);
+// }
