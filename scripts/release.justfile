@@ -5,7 +5,6 @@ release:
   @ just release-modular
   @ just release-precompiled
 
-
 [private]
 [working-directory: ".."]
 release-modular:
