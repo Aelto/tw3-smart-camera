@@ -18,8 +18,8 @@ function OnGameCameraPostTick(
 
 @wrapMethod(CR4PlayerStateHorseRiding)
 function OnGameCameraTick(out moveData: SCameraMovementData, dt: float ) {
-  if (false) {
-    wrappedMethod(moveData, dt);
+  if (!parent.smart_camera_data.settings.is_enabled_on_horse) {
+    return wrappedMethod(moveData, dt);
   }
 
   return true;
