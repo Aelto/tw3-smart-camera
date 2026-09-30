@@ -6,7 +6,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
   var absolute_angle_distance: float;
   var pelvis_torso_angle: EulerAngles;
 
-  if (!player.smart_camera_data.settings.is_enabled_on_horse) {
+  if (!player.smart_camera_data.settings.is_enabled_on_horse || player.vehicleCbtMgrAiming) {
     return false;
   }
 
