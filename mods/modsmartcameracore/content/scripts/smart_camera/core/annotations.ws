@@ -2,10 +2,13 @@
 var smart_camera_data: SC_data;
 
 @wrapMethod(CR4Player)
-function OnGameCameraTick(out moveData : SCameraMovementData, dt : float) {
+function OnGameCameraTick(
+  out moveData: SCameraMovementData,
+  dt: float
+) {
   var res: bool;
 
-  res =  wrappedMethod(moveData, dt);
+  res = wrappedMethod(moveData, dt);
   SC_onGameCameraTick(this, moveData, dt);
 
   return res;
@@ -33,7 +36,6 @@ function SaveChangedSettings() {
   }
 }
 
-
 // disable vanilla sprint camera if SC is enabled
 @wrapMethod(CPlayer)
 function EnableRunCamera(flag: bool) {
@@ -58,7 +60,7 @@ function EnableSprintingCamera(flag: bool) {
 
 // This wrapper was once used, but now removed as it
 // can conflict with mods having a Combat state.
-// The removal of this wrapper does not seem to 
+// The removal of this wrapper does not seem to
 // change anything either, which is odd.
 //
 // leaving it commented in case it causes issues

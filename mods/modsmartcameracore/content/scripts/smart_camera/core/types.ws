@@ -1,4 +1,3 @@
-
 struct SC_data {
 
   /**

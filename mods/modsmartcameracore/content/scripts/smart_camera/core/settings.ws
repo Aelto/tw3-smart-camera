@@ -1,6 +1,8 @@
-
 function SC_reloadSettings(out settings: SC_settings) {
-  LogChannel('SmartCamera', "has mod menu = " + SC_hasModMenu());
+  LogChannel(
+    'SmartCamera',
+    "has mod menu = " + SC_hasModMenu()
+  );
 
   if (SC_hasModMenu()) {
     settings.is_enabled_in_combat = SC_isEnabledInCombat();
@@ -47,7 +49,9 @@ function SC_reloadSettings(out settings: SC_settings) {
 }
 
 function SC_hasModMenu(): bool {
-  return theGame.GetInGameConfigWrapper().GetGroupIdx('SCgeneral') >= 0;
+  return theGame
+    .GetInGameConfigWrapper()
+    .GetGroupIdx('SCgeneral') >= 0;
 }
 
 function SC_isEnabledInCombat(): bool {
@@ -83,109 +87,121 @@ function SC_isEnabledWithMouse(): bool {
 function SC_getCameraZoom(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCcameraZoom')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SCcameraZoom')
   );
 }
 
 function SC_getCameraZoomMax(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCcameraZoomMax')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SCcameraZoomMax')
   );
 }
 
 function SC_getHorizontalSensitivity(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SChorizontalSensitivity')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SChorizontalSensitivity')
   );
 }
 
 function SC_getOverallSpeed(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCoverallSpeed')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SCoverallSpeed')
   );
 }
 
 function SC_getCameraFov(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCcameraFov')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SCcameraFov')
   );
 }
 
 function SC_getCameraHeight(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCcameraHeight')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SCcameraHeight')
   );
 }
 
 function SC_getCameraHeightMax(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCcameraHeightMax')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SCcameraHeightMax')
   );
 }
 
 function SC_getCameraHorizontalPosition(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCcameraHorizontalPosition')
+      .GetInGameConfigWrapper()
+      .GetVarValue(
+        'SCgeneral',
+        'SCcameraHorizontalPosition'
+      )
   );
 }
 
 function SC_getHorseCameraZoom(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SChorseCameraZoom')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SChorseCameraZoom')
   );
 }
 
 function SC_getHorseAutocenterSpeed(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SChorseAutocenterSpeed')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SChorseAutocenterSpeed')
   );
 }
 
 function SC_getHorseCameraTiltIntensity(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCcameraTiltIntensity')
+      .GetInGameConfigWrapper()
+      .GetVarValue('SCgeneral', 'SCcameraTiltIntensity')
   );
 }
 
 function SC_isExplorationAutocenterEnabled(): bool {
   return theGame
     .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCexplorationAutoCenterEnabled');
+    .GetVarValue(
+      'SCgeneral',
+      'SCexplorationAutoCenterEnabled'
+    );
 }
 
 function SC_getExplorationShakeIntensity(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCexplorationShakeIntensity')
+      .GetInGameConfigWrapper()
+      .GetVarValue(
+        'SCgeneral',
+        'SCexplorationShakeIntensity'
+      )
   );
 }
 
 function SC_getExplorationOffsetIntensity(): float {
   return StringToFloat(
     theGame
-    .GetInGameConfigWrapper()
-    .GetVarValue('SCgeneral', 'SCexplorationOffsetIntensity')
+      .GetInGameConfigWrapper()
+      .GetVarValue(
+        'SCgeneral',
+        'SCexplorationOffsetIntensity'
+      )
   );
 }

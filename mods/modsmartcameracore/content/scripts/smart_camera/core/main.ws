@@ -1,5 +1,8 @@
-
-function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementData, delta: float): bool {
+function SC_onGameCameraTick(
+  player: CR4Player,
+  out moveData: SCameraMovementData,
+  delta: float
+): bool {
   var player_to_camera_heading_distance: float;
   var is_mean_position_too_high: bool;
   var player_position: Vector;
@@ -20,8 +23,12 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       SC_reloadSettings(player.smart_camera_data.settings);
     }
 
-    player.smart_camera_data.player_bone_index_rfoot = player.GetBoneIndex('r_foot');
-    player.smart_camera_data.player_bone_index_lfoot = player.GetBoneIndex('l_foot');
+    player.smart_camera_data.player_bone_index_rfoot = player.GetBoneIndex(
+      'r_foot'
+    );
+    player.smart_camera_data.player_bone_index_lfoot = player.GetBoneIndex(
+      'l_foot'
+    );
   }
 
   /////////////////////
@@ -36,11 +43,18 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
   //#endregion roll correction
 
-  if (!player.smart_camera_data.settings.is_enabled_in_combat && !player.smart_camera_data.settings.is_enabled_in_exploration) {
+  if (
+    !player.smart_camera_data.settings.is_enabled_in_combat &&
+    !player.smart_camera_data.settings.is_enabled_in_exploration
+  ) {
     return false;
   }
 
-  if (thePlayer.IsCameraLockedToTarget() || thePlayer.IsCurrentSignChanneled() && thePlayer.GetCurrentlyCastSign() == ST_Igni) {
+  if (
+    thePlayer.IsCameraLockedToTarget() ||
+    thePlayer.IsCurrentSignChanneled() &&
+    thePlayer.GetCurrentlyCastSign() == ST_Igni
+  ) {
     return false;
   }
 
@@ -49,8 +63,10 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       return false;
     }
 
-    if (theInput.GetActionValue('GI_MouseDampX') != 0
-     || theInput.GetActionValue('GI_MouseDampY') != 0) {
+    if (
+      theInput.GetActionValue('GI_MouseDampX') != 0 ||
+      theInput.GetActionValue('GI_MouseDampY') != 0
+    ) {
       player.smart_camera_data.camera_disable_cursor = 1;
     }
   }
@@ -61,7 +77,11 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     player.smart_camera_data.combat_look_at_position.X = 0;
     player.smart_camera_data.combat_look_at_position.Y = 0;
 
-    return SC_onGameCameraTick_outOfCombat(player, moveData, delta);
+    return SC_onGameCameraTick_outOfCombat(
+      player,
+      moveData,
+      delta
+    );
   }
 
   if (!player.smart_camera_data.settings.is_enabled_in_combat) {
@@ -69,21 +89,32 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   }
 
   camera = theGame.GetGameCamera();
-  camera.ChangePivotDistanceController( 'Default' );
-  camera.ChangePivotRotationController( 'Exploration' );
+  camera.ChangePivotDistanceController('Default');
+  camera.ChangePivotRotationController('Exploration');
   camera.fov = thePlayer.smart_camera_data.settings.camera_fov;
   moveData.pivotRotationController = camera.GetActivePivotRotationController();
   moveData.pivotDistanceController = camera.GetActivePivotDistanceController();
   moveData.pivotPositionController = camera.GetActivePivotPositionController();
-  moveData.pivotPositionController.SetDesiredPosition( thePlayer.GetWorldPosition() );
-  moveData.pivotDistanceController.SetDesiredDistance( 3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */ );
+  moveData.pivotPositionController.SetDesiredPosition(
+    thePlayer.GetWorldPosition()
+  );
+  moveData.pivotDistanceController.SetDesiredDistance(
+    3.5f /* - player.GetMovingAgentComponent().GetSpeed() * 0.1 */
+  );
 
   player_position = player.GetWorldPosition();
   player_heading = player.GetHeading();
-  // 3 seconds 
-  player.smart_camera_data.combat_start_smoothing = LerpF(0.33 * delta, player.smart_camera_data.combat_start_smoothing, 1);
+  // 3 seconds
+  player.smart_camera_data.combat_start_smoothing = LerpF(
+    0.33 * delta,
+    player.smart_camera_data.combat_start_smoothing,
+    1
+  );
 
-  target_data = player.SC_computeCombatTargetData(player_position, delta);
+  target_data = player.SC_computeCombatTargetData(
+    player_position,
+    delta
+  );
   target = player.GetTarget();
 
   is_mean_position_too_high = target_data.mean_position.Z - player_position.Z > 3.5;
@@ -98,7 +129,10 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
       true
     );
   }
-  else if (player.smart_camera_data.combat_start_smoothing < 1 && target_data.hostile_enemies_count > 0) {
+  else if (
+    player.smart_camera_data.combat_start_smoothing < 1 &&
+    target_data.hostile_enemies_count > 0
+  ) {
     target_data.mean_position.Z -= 1;
 
     SC_updateCursor(
@@ -118,14 +152,22 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     );
   }
 
-  rotation = VecToRotation(target_data.mean_position - theCamera.GetCameraPosition());
+  rotation = VecToRotation(
+    target_data.mean_position - theCamera.GetCameraPosition()
+  );
   rotation.Pitch *= -1;
 
-  player.smart_camera_data.desired_x_direction += theInput.GetActionValue('GI_AxisRightX')
+  player.smart_camera_data.desired_x_direction += theInput.GetActionValue(
+    'GI_AxisRightX'
+  )
     * delta
     * player.smart_camera_data.settings.horizontal_sensitivity;
 
-  player.smart_camera_data.desired_x_direction = LerpF(delta * 0.3, player.smart_camera_data.desired_x_direction, 0);
+  player.smart_camera_data.desired_x_direction = LerpF(
+    delta * 0.3,
+    player.smart_camera_data.desired_x_direction,
+    0
+  );
 
   ////////////////////
   // Yaw correction //
@@ -137,8 +179,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     player.GetIsSprinting()
   );
 
-
-  if (AbsF(player.smart_camera_data.desired_x_direction) > 0.25) {
+  if (AbsF(
+    player.smart_camera_data.desired_x_direction
+  ) > 0.25) {
     player.smart_camera_data.camera_disable_cursor = 1;
   }
 
@@ -153,7 +196,9 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
         rotation.Yaw
       );
 
-      moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+      moveData.pivotRotationController.SetDesiredHeading(
+        moveData.pivotRotationValue.Yaw
+      );
     }
     // that's for when you're in combat but there are no enemies targetting Geralt
     // or if the camera is disabled because the player is sprinting for a few
@@ -167,11 +212,12 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
         rotation.Yaw
       );
 
-      moveData.pivotRotationController.SetDesiredHeading(moveData.pivotRotationValue.Yaw);
+      moveData.pivotRotationController.SetDesiredHeading(
+        moveData.pivotRotationValue.Yaw
+      );
     }
   }
   //#endregion yaw correction
-
 
   //////////////////////
   // Pitch correction //
@@ -180,16 +226,20 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   // some pitch correction if the mean position is too high compared to the
   // player, which means the target is probably off camera.
   if (thePlayer.IsCameraLockedToTarget()) {
-    moveData.pivotRotationController.SetDesiredPitch( rotation.Pitch - 15 );
-    moveData.pivotRotationValue.Pitch	= LerpAngleF(
+    moveData.pivotRotationController.SetDesiredPitch(
+      rotation.Pitch - 15
+    );
+    moveData.pivotRotationValue.Pitch = LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed * player.smart_camera_data.combat_start_smoothing,
       moveData.pivotRotationValue.Pitch,
       rotation.Pitch - 15
     );
   }
   else if (player.smart_camera_data.pitch_correction_cursor > 0) {
-    moveData.pivotRotationController.SetDesiredPitch(rotation.Pitch);
-    moveData.pivotRotationValue.Pitch	= LerpAngleF(
+    moveData.pivotRotationController.SetDesiredPitch(
+      rotation.Pitch
+    );
+    moveData.pivotRotationValue.Pitch = LerpAngleF(
       delta * player.smart_camera_data.settings.overall_speed,
       moveData.pivotRotationValue.Pitch,
       MaxF(rotation.Pitch, -30)
@@ -205,7 +255,10 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     delta * player.smart_camera_data.settings.overall_speed,
     moveData.pivotRotationValue.Roll,
     player.smart_camera_data.settings.camera_tilt_intensity
-      * AngleDistance(moveData.pivotRotationValue.Yaw, rotation.Yaw)
+      * AngleDistance(
+        moveData.pivotRotationValue.Yaw,
+        rotation.Yaw
+      )
       * 0.03
   );
   //#endregion roll correction
@@ -227,23 +280,20 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
     Vector(
       // x axis: horizontal position, left to right
       player.smart_camera_data.settings.camera_horizontal_position,
-
       // y axis: horizontal position, front to back
       ClampF(
-        4 
-        - player.smart_camera_data.settings.camera_zoom
-        + target_data.offset_from_targets_in_back
-        + ((int)is_mean_position_too_high * -1),
-
+        4
+          - player.smart_camera_data.settings.camera_zoom
+          + target_data.offset_from_targets_in_back
+          + ((int)is_mean_position_too_high * -1),
         -player.smart_camera_data.settings.camera_zoom_max,
         player.smart_camera_data.settings.camera_zoom_max
       ),
-
       // z axis: vertical position, bottom to top
       ClampF(
         player.smart_camera_data.settings.camera_height
-        + ((int)is_mean_position_too_high * 0.2)
-        + target_data.lower_pitch_amount * 1.5 * player.smart_camera_data.pitch_correction_cursor,
+          + ((int)is_mean_position_too_high * 0.2)
+          + target_data.lower_pitch_amount * 1.5 * player.smart_camera_data.pitch_correction_cursor,
         -player.smart_camera_data.settings.camera_height_max,
         player.smart_camera_data.settings.camera_height_max
       )
@@ -255,7 +305,10 @@ function SC_onGameCameraTick(player: CR4Player, out moveData: SCameraMovementDat
   return true;
 }
 
-function SC_getClosestPosition(origin: Vector, positions: array<Vector>): Vector {
+function SC_getClosestPosition(
+  origin: Vector,
+  positions: array<Vector>
+): Vector {
   var closest_distance: float;
   var current_distance: float;
   var position: Vector;
@@ -265,10 +318,16 @@ function SC_getClosestPosition(origin: Vector, positions: array<Vector>): Vector
     return origin;
   }
 
-  closest_distance = VecDistanceSquared2D(origin, positions[0]);
+  closest_distance = VecDistanceSquared2D(
+    origin,
+    positions[0]
+  );
 
   for (i = 0; i < positions.Size(); i += 1) {
-    current_distance = VecDistanceSquared2D(origin, positions[i]);
+    current_distance = VecDistanceSquared2D(
+      origin,
+      positions[i]
+    );
 
     if (current_distance < closest_distance) {
       closest_distance = current_distance;
@@ -279,14 +338,21 @@ function SC_getClosestPosition(origin: Vector, positions: array<Vector>): Vector
   return position;
 }
 
-function SC_getPositionsAroundOrigin(origin: Vector, positions: array<Vector>, radius: float): array<Vector> {
+function SC_getPositionsAroundOrigin(
+  origin: Vector,
+  positions: array<Vector>,
+  radius: float
+): array<Vector> {
   var output: array<Vector>;
   var i: int;
 
   radius *= radius;
 
   for (i = 0; i < positions.Size(); i += 1) {
-    if (VecDistanceSquared2D(origin, positions[i]) <= radius) {
+    if (VecDistanceSquared2D(
+      origin,
+      positions[i]
+    ) <= radius) {
       output.PushBack(positions[i]);
     }
   }

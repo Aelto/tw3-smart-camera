@@ -23,13 +23,15 @@ function SC_computeCombatTargetData(
 
   SC_getEntitiesPositions(this.hostileEnemies, positions);
   output.hostile_enemies_count = this.hostileEnemies.Size();
-  output.mean_position = SC_getMeanPosition(positions) + Vector(0.0, 0.0, -1.0);
+  output.mean_position = SC_getMeanPosition(
+    positions
+  ) + Vector(0.0, 0.0, -1.0);
 
   // LERP the mean position to smooth out the movements
   if (output.hostile_enemies_count > 0) {
     if (
-      this.smart_camera_data.combat_look_at_position.X == 0
-      && this.smart_camera_data.combat_look_at_position.Y == 0
+      this.smart_camera_data.combat_look_at_position.X == 0 &&
+      this.smart_camera_data.combat_look_at_position.Y == 0
     ) {
       this.smart_camera_data.combat_look_at_position = output.mean_position;
     }
@@ -39,13 +41,13 @@ function SC_computeCombatTargetData(
         this.smart_camera_data.combat_look_at_position.X,
         output.mean_position.X
       );
-  
+
       this.smart_camera_data.combat_look_at_position.Y = LerpF(
         delta * this.smart_camera_data.settings.overall_speed,
         this.smart_camera_data.combat_look_at_position.Y,
         output.mean_position.Y
       );
-  
+
       this.smart_camera_data.combat_look_at_position.Z = LerpF(
         delta * this.smart_camera_data.settings.overall_speed,
         this.smart_camera_data.combat_look_at_position.Z,
@@ -66,10 +68,8 @@ function SC_computeCombatTargetData(
     positions
   );
 
-
   return output;
 }
-
 
 function SC_getEntitiesPositions(
   out entities: array<CActor>,
@@ -86,7 +86,9 @@ function SC_getEntitiesPositions(
   }
 }
 
-function SC_getMeanPosition(out positions: array<Vector>): Vector {
+function SC_getMeanPosition(
+  out positions: array<Vector>
+): Vector {
   var mean_position: Vector;
   var i: int;
 
@@ -101,13 +103,14 @@ function SC_getMeanPosition(out positions: array<Vector>): Vector {
   if (thePlayer.IsCameraLockedToTarget()) {
     i = positions.Size();
 
-    mean_position += i * thePlayer.GetTarget().GetWorldPosition();
+    mean_position += i * thePlayer
+      .GetTarget()
+      .GetWorldPosition();
     mean_position /= i;
   }
 
   return mean_position;
 }
-
 
 function SC_getHeightOffsetFromTargetsInBack(
   player: CR4Player,
@@ -131,8 +134,13 @@ function SC_getHeightOffsetFromTargetsInBack(
   }
 
   for (i = 0; i < positions.Size(); i += 1) {
-    current_angle = VecHeading(positions[i] - player_position);
-    current_angle = AngleDistance(player_back_heading, current_angle);
+    current_angle = VecHeading(
+      positions[i] - player_position
+    );
+    current_angle = AngleDistance(
+      player_back_heading,
+      current_angle
+    );
 
     // the entity is not in the Camera's back
     if (current_angle * current_angle > 120 * 120) {
@@ -153,7 +161,10 @@ function SC_getHeightOffsetFromTargetsInBack(
   return ClampF(
     VecDistance2D(mean_position, player_position) * -1,
     0,
-    (10 - MinF(player.smart_camera_data.settings.camera_zoom, 5)) * -0.75,
+    (10 - MinF(
+      player.smart_camera_data.settings.camera_zoom,
+      5
+    )) * -0.75
   );
 }
 
@@ -180,7 +191,10 @@ function SC_shouldLowerPitch(
 
   for (i = 0; i < positions.Size(); i += 1) {
     target_position = positions[i];
-    distance = VecDistanceSquared2D(player_position, target_position);
+    distance = VecDistanceSquared2D(
+      player_position,
+      target_position
+    );
 
     // target is far away, lowered pitch is probably not needed
     if (distance >= 10 * 10) {
@@ -192,12 +206,19 @@ function SC_shouldLowerPitch(
       continue;
     }
 
-    heading_to_target = VecHeading(target_position - camera_position);
-    heading_to_player = VecHeading(player_position - camera_position);
+    heading_to_target = VecHeading(
+      target_position - camera_position
+    );
+    heading_to_player = VecHeading(
+      player_position - camera_position
+    );
 
     // squared values because angle may otherwise be a negative value in some
     // cases
-    distance_angle = AngleDistance(heading_to_player, heading_to_target);
+    distance_angle = AngleDistance(
+      heading_to_player,
+      heading_to_target
+    );
     distance_angle *= distance_angle;
 
     // 100 because it's 10*10
@@ -231,7 +252,10 @@ function SC_shouldLowerPitch(
   if (lower_pitch_amount_local > 0.0) {
     // finally, the more targets there are the less intense it is:
     // i == positions.Size() here since the loop is over
-    lower_pitch_amount = MaxF(0, lower_pitch_amount - 0.1 * i);
+    lower_pitch_amount = MaxF(
+      0,
+      lower_pitch_amount - 0.1 * i
+    );
 
     return true;
   }
