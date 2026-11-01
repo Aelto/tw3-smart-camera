@@ -47,7 +47,7 @@ function SC_reloadSettings(out settings: SC_settings) {
 }
 
 function SC_hasModMenu(): bool {
-  return GetLocStringByKey("panel_sc_name") != "";
+  return theGame.GetInGameConfigWrapper().GetGroupIdx('SCgeneral') >= 0;
 }
 
 function SC_isEnabledInCombat(): bool {
