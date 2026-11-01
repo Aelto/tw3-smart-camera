@@ -135,7 +135,7 @@ function SC_horseOnCameraTickPostTick(player: CR4Player, horse: W3HorseComponent
                       * (float)player.smart_camera_data.horse_auto_center_enabled
                       * player.smart_camera_data.settings.horse_camera_zoom;
 
-  moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset + 0.5);
+  moveData.pivotDistanceController.SetDesiredDistance(horse_zoom_offset + 1.5);
   moveData.pivotPositionController.SetDesiredPosition(
     horse.GetEntity().GetWorldPosition()
   );
